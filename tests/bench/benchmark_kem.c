@@ -10,8 +10,8 @@
 #include "parameters.h"
 #include "symmetric.h"
 
-#define NB_TEST    100
-#define NB_SAMPLES 1000
+#define NB_TEST    10
+#define NB_SAMPLES 10
 
 static inline uint64_t get_time_ns(void) {
     struct timespec ts;
