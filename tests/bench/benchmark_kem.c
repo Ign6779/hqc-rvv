@@ -13,36 +13,40 @@
 #define NB_TEST    100
 #define NB_SAMPLES 1000
 
-inline static uint64_t cpucyclesStart(void) {
-    unsigned hi, lo;
-    __asm__ __volatile__(
-        "CPUID\n\t"
-        "RDTSC\n\t"
-        "mov %%edx, %0\n\t"
-        "mov %%eax, %1\n\t"
-        : "=r"(hi), "=r"(lo)
-        :
-        : "%rax", "%rbx", "%rcx", "%rdx");
-    return ((uint64_t)lo) ^ (((uint64_t)hi) << 32);
-}
-
-inline static uint64_t cpucyclesStop(void) {
-    unsigned hi, lo;
-    __asm__ __volatile__(
-        "RDTSCP\n\t"
-        "mov %%edx, %0\n\t"
-        "mov %%eax, %1\n\t"
-        "CPUID\n\t"
-        : "=r"(hi), "=r"(lo)
-        :
-        : "%rax", "%rbx", "%rcx", "%rdx");
-    return ((uint64_t)lo) ^ (((uint64_t)hi) << 32);
-}
-
 static inline uint64_t get_time_ns(void) {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return (uint64_t)ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+}
+
+static inline uint64_t cpucyclesStart(void) {
+#if defined(__riscv)
+    uint64_t cycles;
+    __asm__ __volatile__(
+        "fence\n\t"
+        "csrr %0, cycle"
+        : "=r"(cycles)
+        :
+        : "memory");
+    return cycles;
+#else
+    return get_time_ns();
+#endif
+}
+
+static inline uint64_t cpucyclesStop(void) {
+#if defined(__riscv)
+    uint64_t cycles;
+    __asm__ __volatile__(
+        "csrr %0, cycle\n\t"
+        "fence"
+        : "=r"(cycles)
+        :
+        : "memory");
+    return cycles;
+#else
+    return get_time_ns();
+#endif
 }
 
 int main(void) {
