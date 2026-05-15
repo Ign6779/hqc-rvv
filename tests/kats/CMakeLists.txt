@@ -13,6 +13,14 @@ if(HQC_ARCH STREQUAL "x86_64")
     set(ARCH_COMMON_DIR "${CMAKE_SOURCE_DIR}/src/${HQC_ARCH}/common")
     set(KAT_GOLD_DIR    "${CMAKE_SOURCE_DIR}/kats/${HQC_ARCH}/${HQC_X86_IMPL}")
     set(IMD_GOLD_DIR    "${CMAKE_SOURCE_DIR}/kats/${HQC_ARCH}/${HQC_X86_IMPL}")
+elseif(HQC_ARCH STREQUAL "riscv")
+    # The riscv build currently reuses the reference implementation,
+    # except that src/ref/gf2x.c is replaced by src/riscv/rvv/gf2x.c.
+    # Therefore, expected KAT/intermediate outputs are the reference ones.
+    set(IMPL_DIR        "${CMAKE_SOURCE_DIR}/src/riscv/rvv")
+    set(ARCH_COMMON_DIR "${CMAKE_SOURCE_DIR}/src/ref")
+    set(KAT_GOLD_DIR    "${CMAKE_SOURCE_DIR}/kats/ref")
+    set(IMD_GOLD_DIR    "${CMAKE_SOURCE_DIR}/kats/ref")
 else()
     set(IMPL_DIR       "${CMAKE_SOURCE_DIR}/src/ref")
     set(ARCH_COMMON_DIR "${CMAKE_SOURCE_DIR}/src/ref")
@@ -47,7 +55,7 @@ foreach(variant IN LISTS VARIANTS)
                 fips202
         )
         target_compile_definitions(${exe} PRIVATE
-                $<$<STREQUAL:${HQC_ARCH},ref>:REF_MODE>
+                $<$<OR:$<STREQUAL:${HQC_ARCH},ref>,$<STREQUAL:${HQC_ARCH},riscv>>:REF_MODE>
                 $<$<AND:$<STREQUAL:${HQC_ARCH},x86_64>,$<STREQUAL:${HQC_X86_IMPL},avx256>>:AVX2_MODE>
         )
         target_include_directories(${exe} PRIVATE
@@ -95,6 +103,11 @@ foreach(variant IN LISTS VARIANTS)
                 "${ARCH_COMMON_DIR}/*.c"
                 "${ARCH_COMMON_DIR}/${variant}/*.c"
         )
+        if(HQC_ARCH STREQUAL "riscv")
+                list(REMOVE_ITEM ARCH_COMMON_SRCS
+                        "${CMAKE_SOURCE_DIR}/src/ref/gf2x.c"
+                )
+        endif()
         file(GLOB VARIANT_SRCS
                 "${IMPL_DIR}/${variant}/*.c"
                 "${IMPL_DIR}/${variant}/*/*.c"
@@ -114,7 +127,7 @@ foreach(variant IN LISTS VARIANTS)
         )
         target_compile_definitions(${exe} PRIVATE
                 VERBOSE
-                $<$<STREQUAL:${HQC_ARCH},ref>:REF_MODE>
+                $<$<OR:$<STREQUAL:${HQC_ARCH},ref>,$<STREQUAL:${HQC_ARCH},riscv>>:REF_MODE>
                 $<$<AND:$<STREQUAL:${HQC_ARCH},x86_64>,$<STREQUAL:${HQC_X86_IMPL},avx256>>:AVX2_MODE>
         )
         target_include_directories(${exe} PRIVATE
