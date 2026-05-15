@@ -12,18 +12,35 @@ file(GLOB COMMON_SOURCES
 # 2) arch-common: shared across variants (top-level .c)
 if(HQC_ARCH STREQUAL "ref")
     set(ARCH_COMMON_DIR "${CMAKE_SOURCE_DIR}/src/ref")
-else()
+elseif(HQC_ARCH STREQUAL "x86_64")
     set(ARCH_COMMON_DIR "${CMAKE_SOURCE_DIR}/src/x86_64/common")
+elseif(HQC_ARCH STREQUAL "riscv")
+    # reusing ref common for now
+    # removing gf2x.c and replacing with rvv version below
+    set(ARCH_COMMON_DIR "${CMAKE_SOURCE_DIR}/src/ref")
+else()
+    message(FATAL_ERROR "Unsupported HQC_ARCH: ${HQC_ARCH}")
 endif()
 file(GLOB ARCH_COMMON_TOP_SOURCES
         "${ARCH_COMMON_DIR}/*.c"
 )
 
+# when building riscv, remove ref gf2x.c with rvv version
+if(HQC_ARCH STREQUAL "riscv")
+    list(REMOVE_ITEM ARCH_COMMON_TOP_SOURCES
+        "${CMAKE_SOURCE_DIR}/src/ref/gf2x.c"
+    )
+endif()
+
 # 3) arch-specific implementation sources
 if(HQC_ARCH STREQUAL "ref")
     set(PLATFORM_DIR "${CMAKE_SOURCE_DIR}/src/ref")
-else()
+elseif(HQC_ARCH STREQUAL "x86_64")
     set(PLATFORM_DIR "${CMAKE_SOURCE_DIR}/src/x86_64/${HQC_X86_IMPL}")
+elseif(HQC_ARCH STREQUAL "riscv")
+    set(PLATFORM_DIR "${CMAKE_SOURCE_DIR}/src/riscv/rvv")
+else()
+    message(FATAL_ERROR "Unsupported HQC_ARCH: ${HQC_ARCH}")
 endif()
 file(GLOB PLATFORM_SOURCES
         "${PLATFORM_DIR}/*.c"
@@ -35,8 +52,13 @@ foreach(var IN LISTS VARIANTS)
 
     if(HQC_ARCH STREQUAL "ref")
         set(VAR_DIR "${CMAKE_SOURCE_DIR}/src/ref/${var}")
-    else()
+    elseif(HQC_ARCH STREQUAL "x86_64")
         set(VAR_DIR "${CMAKE_SOURCE_DIR}/src/x86_64/${HQC_X86_IMPL}/${var}")
+    elseif(HQC_ARCH STREQUAL "riscv")
+        # for now, reuse the reference parameter-specific files.
+        set(VAR_DIR "${CMAKE_SOURCE_DIR}/src/ref/${var}")
+    else()
+        message(FATAL_ERROR "Unsupported HQC_ARCH: ${HQC_ARCH}")
     endif()
     file(GLOB VARIANT_SOURCES
             "${VAR_DIR}/*.c"

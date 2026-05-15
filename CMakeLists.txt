@@ -8,10 +8,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # -----------------------------------------------------------------------------
 # ARCHITECTURE SELECTION
 # -----------------------------------------------------------------------------
-set(HQC_ARCH "ref" CACHE STRING "Choose implementation: ref or x86_64")
-set_property(CACHE HQC_ARCH PROPERTY STRINGS ref x86_64)
-if(NOT HQC_ARCH STREQUAL "ref" AND NOT HQC_ARCH STREQUAL "x86_64")
-    message(FATAL_ERROR "HQC_ARCH must be 'ref' or 'x86_64'")
+set(HQC_ARCH "ref" CACHE STRING "Choose implementation: ref, x86_64, or riscv")
+set_property(CACHE HQC_ARCH PROPERTY STRINGS ref x86_64 riscv)
+if(NOT HQC_ARCH STREQUAL "ref" AND NOT HQC_ARCH STREQUAL "x86_64" AND NOT HQC_ARCH STREQUAL "riscv")
+    message(FATAL_ERROR "HQC_ARCH must be 'ref', 'x86_64', or 'riscv'")
 endif()
 
 # -----------------------------------------------------------------------------
@@ -19,9 +19,12 @@ endif()
 # -----------------------------------------------------------------------------
 if(HQC_ARCH STREQUAL "ref")
     add_compile_definitions(HQC_ARCH_REF=1)
-else()
+elseif(HQC_ARCH STREQUAL "x86_64")
     add_compile_definitions(HQC_ARCH_X86_64=1)
     add_compile_definitions(HQC_ARCH_X86_64_AVX256=1)
+elseif(HQC_ARCH STREQUAL "riscv")
+    add_compile_definitions(HQC_ARCH_RISCV=1)
+    add_compile_definitions(HQC_ARCH_RISCV_RVV=1)
 endif()
 
 # -----------------------------------------------------------------------------
