@@ -4,7 +4,7 @@ project(hqc_unit_tests C CXX)
 enable_testing()
 
 if(NOT DEFINED HQC_ARCH)
-    message(FATAL_ERROR "HQC_ARCH must be set (ref or x86_64)")
+    message(FATAL_ERROR "HQC_ARCH must be set (ref, x86_64, or riscv)")
 endif()
 if(HQC_ARCH STREQUAL "x86_64" AND NOT DEFINED HQC_X86_IMPL)
     message(FATAL_ERROR "HQC_X86_IMPL must be set when HQC_ARCH=x86_64")
@@ -55,7 +55,7 @@ foreach(param_variant IN LISTS VARIANTS)
                 ${CMAKE_SOURCE_DIR}/src/ref
                 ${CMAKE_SOURCE_DIR}/src/ref/${param_variant}
         )
-    else()
+    elseif(HQC_ARCH STREQUAL "x86_64")
         set(lib_target    ${safe_param}_${HQC_ARCH})
         set(exe_name      test_unit_${safe_param}_${HQC_X86_IMPL})
 
@@ -64,6 +64,16 @@ foreach(param_variant IN LISTS VARIANTS)
                 ${CMAKE_SOURCE_DIR}/src/x86_64/common
                 ${CMAKE_SOURCE_DIR}/src/x86_64/common/${param_variant}
                 ${CMAKE_SOURCE_DIR}/src/x86_64/${HQC_X86_IMPL}
+        )
+    elseif(HQC_ARCH STREQUAL "riscv")
+        set(lib_target    ${safe_param}_riscv)
+        set(exe_name      test_unit_${safe_param}_riscv)
+
+        set(PARAM_INCLUDES
+                ${CMAKE_SOURCE_DIR}/src/common/${param_variant}
+                ${CMAKE_SOURCE_DIR}/src/ref
+                ${CMAKE_SOURCE_DIR}/src/ref/${param_variant}
+                ${CMAKE_SOURCE_DIR}/src/riscv/rvv
         )
     endif()
 
