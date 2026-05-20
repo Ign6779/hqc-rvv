@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(hqc VERSION 1.0 LANGUAGES C CXX)
+project(hqc VERSION 1.0 LANGUAGES C CXX ASM)
 
 # Enable testing & export compile commands
 enable_testing()
@@ -88,9 +88,24 @@ elseif(HQC_SANITIZER STREQUAL "UBSAN")
     add_link_options(-fsanitize=undefined)
 endif()
 
+if(HQC_ARCH STREQUAL "riscv")
+    if(NOT DEFINED HQC_RISCV_MARCH OR NOT DEFINED HQC_RISCV_MABI)
+        message(FATAL_ERROR "For HQC_ARCH=riscv, set HQC_RISCV_MARCH and HQC_RISCV_MABI")
+    endif()
+endif()
+
 foreach(hqc_c_flag IN LISTS HQC_C_FLAGS)
     add_compile_options($<$<COMPILE_LANGUAGE:C>:${hqc_c_flag}>)
 endforeach()
+
+if(HQC_ARCH STREQUAL "riscv")
+    add_compile_options(
+            $<$<COMPILE_LANGUAGE:C>:-march=${HQC_RISCV_MARCH}>
+            $<$<COMPILE_LANGUAGE:C>:-mabi=${HQC_RISCV_MABI}>
+            $<$<COMPILE_LANGUAGE:ASM>:-march=${HQC_RISCV_MARCH}>
+            $<$<COMPILE_LANGUAGE:ASM>:-mabi=${HQC_RISCV_MABI}>
+    )
+endif()
 
 # -----------------------------------------------------------------------------
 # BUILD SUBDIRECTORIES

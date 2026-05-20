@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(hqc-src C)
+project(hqc-src C ASM)
 
 # List of HQC parameter variants
 set(VARIANTS "hqc-1;hqc-3;hqc-5" CACHE INTERNAL "List of variants")
@@ -22,6 +22,7 @@ else()
 endif()
 file(GLOB ARCH_COMMON_TOP_SOURCES
         "${ARCH_COMMON_DIR}/*.c"
+        "${ARCH_COMMON_DIR}/*.S"
 )
 
 # 3) arch-specific implementation sources
@@ -36,6 +37,7 @@ else()
 endif()
 file(GLOB PLATFORM_SOURCES
         "${PLATFORM_DIR}/*.c"
+        "${PLATFORM_DIR}/*.S"
 )
 
 # 4) build one static library per variant
@@ -53,10 +55,12 @@ foreach(var IN LISTS VARIANTS)
     endif()
     file(GLOB VARIANT_SOURCES
             "${VAR_DIR}/*.c"
+            "${VAR_DIR}/*.S"
     )
 
     file(GLOB ARCH_COMMON_VARIANT_SOURCES
             "${ARCH_COMMON_DIR}/${var}/*.c"
+            "${ARCH_COMMON_DIR}/${var}/*.S"
     )
 
     add_library(${safe}_${HQC_ARCH} STATIC
