@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.21)
 include(CTest)
 
 if(NOT DEFINED HQC_ARCH)
-    message(FATAL_ERROR "HQC_ARCH must be set (ref or x86_64)")
+    message(FATAL_ERROR "HQC_ARCH must be set (ref, x86_64, or riscv)")
 endif()
 
 set(TEST_OUTPUT_DIR "${CMAKE_BINARY_DIR}/test_outputs")
@@ -14,13 +14,10 @@ if(HQC_ARCH STREQUAL "x86_64")
     set(KAT_GOLD_DIR    "${CMAKE_SOURCE_DIR}/kats/${HQC_ARCH}/${HQC_X86_IMPL}")
     set(IMD_GOLD_DIR    "${CMAKE_SOURCE_DIR}/kats/${HQC_ARCH}/${HQC_X86_IMPL}")
 elseif(HQC_ARCH STREQUAL "riscv")
-    # The riscv build currently reuses the reference implementation,
-    # except that src/ref/gf2x.c is replaced by src/riscv/rvv/gf2x.c.
-    # Therefore, expected KAT/intermediate outputs are the reference ones.
-    set(IMPL_DIR        "${CMAKE_SOURCE_DIR}/src/riscv/rvv")
-    set(ARCH_COMMON_DIR "${CMAKE_SOURCE_DIR}/src/ref")
-    set(KAT_GOLD_DIR    "${CMAKE_SOURCE_DIR}/kats/ref")
-    set(IMD_GOLD_DIR    "${CMAKE_SOURCE_DIR}/kats/ref")
+    set(IMPL_DIR        "${CMAKE_SOURCE_DIR}/src/${HQC_ARCH}/${HQC_RISCV_IMPL}")
+    set(ARCH_COMMON_DIR "${CMAKE_SOURCE_DIR}/src/${HQC_ARCH}/common")
+    set(KAT_GOLD_DIR    "${CMAKE_SOURCE_DIR}/kats/${HQC_ARCH}/${HQC_RISCV_IMPL}")
+    set(IMD_GOLD_DIR    "${CMAKE_SOURCE_DIR}/kats/${HQC_ARCH}/${HQC_RISCV_IMPL}")
 else()
     set(IMPL_DIR       "${CMAKE_SOURCE_DIR}/src/ref")
     set(ARCH_COMMON_DIR "${CMAKE_SOURCE_DIR}/src/ref")
@@ -55,8 +52,9 @@ foreach(variant IN LISTS VARIANTS)
                 fips202
         )
         target_compile_definitions(${exe} PRIVATE
-                $<$<OR:$<STREQUAL:${HQC_ARCH},ref>,$<STREQUAL:${HQC_ARCH},riscv>>:REF_MODE>
+                $<$<STREQUAL:${HQC_ARCH},ref>:REF_MODE>
                 $<$<AND:$<STREQUAL:${HQC_ARCH},x86_64>,$<STREQUAL:${HQC_X86_IMPL},avx256>>:AVX2_MODE>
+                $<$<AND:$<STREQUAL:${HQC_ARCH},riscv>,$<STREQUAL:${HQC_RISCV_IMPL},rvv>>:RVV_MODE>
         )
         target_include_directories(${exe} PRIVATE
                 ${CMAKE_SOURCE_DIR}/tests/kats
@@ -103,11 +101,6 @@ foreach(variant IN LISTS VARIANTS)
                 "${ARCH_COMMON_DIR}/*.c"
                 "${ARCH_COMMON_DIR}/${variant}/*.c"
         )
-        if(HQC_ARCH STREQUAL "riscv")
-                list(REMOVE_ITEM ARCH_COMMON_SRCS
-                        "${CMAKE_SOURCE_DIR}/src/ref/gf2x.c"
-                )
-        endif()
         file(GLOB VARIANT_SRCS
                 "${IMPL_DIR}/${variant}/*.c"
                 "${IMPL_DIR}/${variant}/*/*.c"
@@ -127,8 +120,9 @@ foreach(variant IN LISTS VARIANTS)
         )
         target_compile_definitions(${exe} PRIVATE
                 VERBOSE
-                $<$<OR:$<STREQUAL:${HQC_ARCH},ref>,$<STREQUAL:${HQC_ARCH},riscv>>:REF_MODE>
+                $<$<STREQUAL:${HQC_ARCH},ref>:REF_MODE>
                 $<$<AND:$<STREQUAL:${HQC_ARCH},x86_64>,$<STREQUAL:${HQC_X86_IMPL},avx256>>:AVX2_MODE>
+                $<$<AND:$<STREQUAL:${HQC_ARCH},riscv>,$<STREQUAL:${HQC_RISCV_IMPL},rvv>>:RVV_MODE>
         )
         target_include_directories(${exe} PRIVATE
                 ${CMAKE_SOURCE_DIR}/tests/kats

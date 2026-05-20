@@ -14,10 +14,9 @@ if(HQC_ARCH STREQUAL "ref")
     set(ARCH_COMMON_DIR "${CMAKE_SOURCE_DIR}/src/ref")
 elseif(HQC_ARCH STREQUAL "x86_64")
     set(ARCH_COMMON_DIR "${CMAKE_SOURCE_DIR}/src/x86_64/common")
+#reusing top-level files for now
 elseif(HQC_ARCH STREQUAL "riscv")
-    # reusing ref common for now
-    # removing gf2x.c and replacing with rvv version below
-    set(ARCH_COMMON_DIR "${CMAKE_SOURCE_DIR}/src/ref")
+    set(ARCH_COMMON_DIR "${CMAKE_SOURCE_DIR}/src/riscv/common")
 else()
     message(FATAL_ERROR "Unsupported HQC_ARCH: ${HQC_ARCH}")
 endif()
@@ -25,20 +24,13 @@ file(GLOB ARCH_COMMON_TOP_SOURCES
         "${ARCH_COMMON_DIR}/*.c"
 )
 
-# when building riscv, remove ref gf2x.c with rvv version
-if(HQC_ARCH STREQUAL "riscv")
-    list(REMOVE_ITEM ARCH_COMMON_TOP_SOURCES
-        "${CMAKE_SOURCE_DIR}/src/ref/gf2x.c"
-    )
-endif()
-
 # 3) arch-specific implementation sources
 if(HQC_ARCH STREQUAL "ref")
     set(PLATFORM_DIR "${CMAKE_SOURCE_DIR}/src/ref")
 elseif(HQC_ARCH STREQUAL "x86_64")
     set(PLATFORM_DIR "${CMAKE_SOURCE_DIR}/src/x86_64/${HQC_X86_IMPL}")
 elseif(HQC_ARCH STREQUAL "riscv")
-    set(PLATFORM_DIR "${CMAKE_SOURCE_DIR}/src/riscv/rvv")
+    set(PLATFORM_DIR "${CMAKE_SOURCE_DIR}/src/riscv/${HQC_RISCV_IMPL}")
 else()
     message(FATAL_ERROR "Unsupported HQC_ARCH: ${HQC_ARCH}")
 endif()
@@ -55,8 +47,7 @@ foreach(var IN LISTS VARIANTS)
     elseif(HQC_ARCH STREQUAL "x86_64")
         set(VAR_DIR "${CMAKE_SOURCE_DIR}/src/x86_64/${HQC_X86_IMPL}/${var}")
     elseif(HQC_ARCH STREQUAL "riscv")
-        # for now, reuse the reference parameter-specific files.
-        set(VAR_DIR "${CMAKE_SOURCE_DIR}/src/ref/${var}")
+        set(VAR_DIR "${CMAKE_SOURCE_DIR}/src/riscv/${HQC_RISCV_IMPL}/${var}")
     else()
         message(FATAL_ERROR "Unsupported HQC_ARCH: ${HQC_ARCH}")
     endif()
