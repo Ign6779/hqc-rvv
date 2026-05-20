@@ -14,10 +14,12 @@ if(HQC_ARCH STREQUAL "x86_64")
     set(KAT_GOLD_DIR    "${CMAKE_SOURCE_DIR}/kats/${HQC_ARCH}/${HQC_X86_IMPL}")
     set(IMD_GOLD_DIR    "${CMAKE_SOURCE_DIR}/kats/${HQC_ARCH}/${HQC_X86_IMPL}")
 elseif(HQC_ARCH STREQUAL "riscv")
-    set(IMPL_DIR        "${CMAKE_SOURCE_DIR}/src/${HQC_ARCH}/${HQC_RISCV_IMPL}")
+    set(IMPL_DIR         "${CMAKE_SOURCE_DIR}/src/${HQC_ARCH}/${HQC_RISCV_IMPL}")
     set(ARCH_COMMON_DIR "${CMAKE_SOURCE_DIR}/src/${HQC_ARCH}/common")
-    set(KAT_GOLD_DIR    "${CMAKE_SOURCE_DIR}/kats/${HQC_ARCH}/${HQC_RISCV_IMPL}")
-    set(IMD_GOLD_DIR    "${CMAKE_SOURCE_DIR}/kats/${HQC_ARCH}/${HQC_RISCV_IMPL}")
+
+    # RVV should be compatible with the reference implementation.
+    set(KAT_GOLD_DIR    "${CMAKE_SOURCE_DIR}/kats/ref")
+    set(IMD_GOLD_DIR    "${CMAKE_SOURCE_DIR}/kats/ref")
 else()
     set(IMPL_DIR       "${CMAKE_SOURCE_DIR}/src/ref")
     set(ARCH_COMMON_DIR "${CMAKE_SOURCE_DIR}/src/ref")
@@ -96,14 +98,19 @@ foreach(variant IN LISTS VARIANTS)
 
         file(GLOB IMPL_SRCS
                 "${IMPL_DIR}/*.c"
+                "${IMPL_DIR}/*.S"
         )
         file(GLOB ARCH_COMMON_SRCS
                 "${ARCH_COMMON_DIR}/*.c"
+                "${ARCH_COMMON_DIR}/*.S"
                 "${ARCH_COMMON_DIR}/${variant}/*.c"
+                "${ARCH_COMMON_DIR}/${variant}/*.S"
         )
         file(GLOB VARIANT_SRCS
                 "${IMPL_DIR}/${variant}/*.c"
+                "${IMPL_DIR}/${variant}/*.S"
                 "${IMPL_DIR}/${variant}/*/*.c"
+                "${IMPL_DIR}/${variant}/*/*.S"
         )
 
         add_executable(${exe}
