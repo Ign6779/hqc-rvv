@@ -58,3 +58,85 @@ V2:
     .text
     .globl rvv_toom3_mul
     .type rvv_toom3_mul, @function
+
+rvv_toom3_mul:
+# CLEANING SQUAD
+    mv t3, a0
+    ZERO_WORDS t3, TMP_WORDS
+
+    la t3, U0
+    ZERO_WORDS t3, EVAL_WORDS
+
+    la t3, U1
+    ZERO_WORDS t3, EVAL_WORDS
+
+    la t3, U2
+    ZERO_WORDS t3, EVAL_WORDS
+
+    la t3, V0
+    ZERO_WORDS t3, EVAL_WORDS
+
+    la t3, V1
+    ZERO_WORDS t3, EVAL_WORDS
+
+    la t3, V2
+    ZERO_WORDS t3, EVAL_WORDS
+
+# TOOM3 SPLIT
+    # U0 = A + 0 * TOOM_WORDS
+    la t3, U0
+    mv t4, a1
+    COPY_WORDS t3, t4, TOOM_WORDS
+
+    # U1 = A + 1 * TOOM_WORDS
+    la t3, U1
+    mv t4, a1
+    addi t4, t4, TOOM_WORDS * 8
+    COPY_WORDS t3, t4, TOOM_WORDS
+
+    # U2 = A + 2 * TOOM_WORDS
+    # Only copy the real input words. Do not read padded words from A.
+    la t3, U2
+    mv t4, a1
+    addi t4, t4, (2 * TOOM_WORDS) * 8
+    COPY_WORDS t3, t4, U2_REAL_WORDS
+
+    # Mask unused high bits of final real word in U2.
+    la t3, U2
+    ld t4, 88 * 8(t3)
+    li t5, LAST_WORD_MASK
+    and t4, t4, t5
+    sd t4, 88 * 8(t3)
+
+    # V0 = B + 0 * TOOM_WORDS
+    la t3, V0
+    mv t4, a2
+    COPY_WORDS t3, t4, TOOM_WORDS
+
+    # V1 = B + 1 * TOOM_WORDS
+    la t3, V1
+    mv t4, a2
+    addi t4, t4, TOOM_WORDS * 8
+    COPY_WORDS t3, t4, TOOM_WORDS
+
+    # V2 = B + 2 * TOOM_WORDS
+    # Only copy the real input words. Do not read padded words from B.
+    la t3, V2
+    mv t4, a2
+    addi t4, t4, (2 * TOOM_WORDS) * 8
+    COPY_WORDS t3, t4, U2_REAL_WORDS
+
+    # Mask unused high bits of final real word in V2.
+    la t3, V2
+    ld t4, 88 * 8(t3)
+    li t5, LAST_WORD_MASK
+    and t4, t4, t5
+    sd t4, 88 * 8(t3)
+
+    # multiplication here or whatever
+    # write to output
+    # WIPE BUFFERS
+
+    ret
+
+    .size rvv_toom3_mul, .-rvv_toom3_mul
