@@ -10,10 +10,15 @@
 #include <stddef.h>
 #include <string.h>
 
-#define GF2X_UNREDUCED_WORDS (2 * VEC_N_SIZE_64 + 1)
+#define GF2X_PAD_WORDS        (PARAM_N_MULT / 64)
+#define GF2X_UNREDUCED_WORDS  (2 * GF2X_PAD_WORDS + 1)
 
 /**
- * Implemented in gf2x.S.
+ * Implemented in the specific assembly file:
+ *
+ *   hqc-1/gf2x_toom.S
+ *   hqc-3/gf2x_toom.S
+ *   hqc-5/gf2x_toom.S
  *
  * @brief Computes tmp = a1 * a2 over GF(2)[X].
  *
@@ -22,7 +27,7 @@
 extern void rvv_toom3_mul(uint64_t *tmp, const uint64_t *a1, const uint64_t *a2);
 
 /**
- * Implemented in gf2x.S.
+ * Implemented in gf2x_reduce.S.
  *
  * @brief Modular reduction of a degree < 2n polynomial modulo X^n - 1.
  */
