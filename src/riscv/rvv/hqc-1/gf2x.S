@@ -59,6 +59,23 @@
 .L_xor3_done\@:
 .endm
 
+.macro XOR_INTO_WORDS dst_reg, src_reg, nwords
+    li t0, \nwords
+.L_xor_into_loop\@:
+    beqz t0, .L_xor_into_done\@
+    VSETVLI_E64_M1(t1, t0)
+    vle64.v v0, (\dst_reg)
+    vle64.v v1, (\src_reg)
+    vxor.vv v0, v0, v1
+    vse64.v v0, (\dst_reg)
+    slli t2, t1, 3
+    add \dst_reg, \dst_reg, t2
+    add \src_reg, \src_reg, t2
+    sub t0, t0, t1
+    j .L_xor_into_loop\@
+.L_xor_into_done\@:
+.endm
+
     .section .bss
     .align 3
 
@@ -190,6 +207,52 @@ rvv_toom3_mul:
     XOR3_WORDS t3, t4, t5, t6, EVAL_WORDS
 
     # multiplication here
+
+    # eval at x = X^w w = 64
+    # possible optimizations in changing w
+    la t3, EA
+    ZERO_WORDS t3, EVAL_WORDS
+
+    la t3, EB
+    ZERO_WORDS t3, EVAL_WORDS
+
+    # EA = A(x) = U0 ^ (U1 << 64) ^ (U2 << 128)
+    # EA[0..93] ^= U0[0..93]
+    la t3, EA
+    la t4, U0
+    XOR_INTO_WORDS t3, t4, TOOM_WORDS
+
+    # EA[1..94] ^= U1[0..93]
+    la t3, EA
+    addi t3, t3, 8
+    la t4, U1
+    XOR_INTO_WORDS t3, t4, TOOM_WORDS
+
+    # EA[2..95] ^= U2[0..93]
+    # can possibly reduce this
+    la t3, EA
+    addi t3, t3, 16
+    la t4, U2
+    XOR_INTO_WORDS t3, t4, TOOM_WORDS
+
+    # EB = B(x) = V0 ^ (V1 << 64) ^ (V2 << 128)
+    # EB[0..93] ^= V0[0..93]
+    la t3, EB
+    la t4, V0
+    XOR_INTO_WORDS t3, t4, TOOM_WORDS
+
+    # EB[1..94] ^= V1[0..93]
+    la t3, EB
+    addi t3, t3, 8
+    la t4, V1
+    XOR_INTO_WORDS t3, t4, TOOM_WORDS
+
+    # EB[2..95] ^= V2[0..93]
+    # can possibly reduce this
+    la t3, EB
+    addi t3, t3, 16
+    la t4, V2
+    XOR_INTO_WORDS t3, t4, TOOM_WORDS
 
     # write to output
     # WIPE BUFFERS
