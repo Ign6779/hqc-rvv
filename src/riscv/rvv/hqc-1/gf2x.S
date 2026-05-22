@@ -38,6 +38,27 @@
 .L_copy_done\@:
 .endm
 
+.macro XOR3_WORDS dst_reg, src1_reg, src2_reg, src3_reg, nwords
+    li t0, \nwords
+.L_xor3_loop\@:
+    beqz t0, .L_xor3_done\@
+    VSETVLI_E64_M1(t1, t0)
+    vle64.v v0, (\src1_reg)
+    vle64.v v1, (\src2_reg)
+    vle64.v v2, (\src3_reg)
+    vxor.vv v3, v0, v1
+    vxor.vv v3, v3, v2
+    vse64.v v3, (\dst_reg)
+    slli t2, t1, 3
+    add \src1_reg, \src1_reg, t2
+    add \src2_reg, \src2_reg, t2
+    add \src3_reg, \src3_reg, t2
+    add \dst_reg, \dst_reg, t2
+    sub t0, t0, t1
+    j .L_xor3_loop\@
+.L_xor3_done\@:
+.endm
+
     .section .bss
     .align 3
 
@@ -53,6 +74,11 @@ V0:
 V1:
     .zero EVAL_WORDS * 8
 V2:
+    .zero EVAL_WORDS * 8
+
+EA:
+    .zero EVAL_WORDS * 8 
+EB:
     .zero EVAL_WORDS * 8
 
     .text
@@ -80,6 +106,12 @@ rvv_toom3_mul:
     ZERO_WORDS t3, EVAL_WORDS
 
     la t3, V2
+    ZERO_WORDS t3, EVAL_WORDS
+
+    la t3, EA
+    ZERO_WORDS t3, EVAL_WORDS
+
+    la t3, EB
     ZERO_WORDS t3, EVAL_WORDS
 
 # TOOM3 SPLIT
@@ -133,7 +165,32 @@ rvv_toom3_mul:
     and t4, t4, t5
     sd t4, 88 * 8(t3)
 
-    # multiplication here or whatever
+# TOOM EVALUATION
+    # already have U0, V0
+
+    # eval at 1
+    la t3, EA
+    ZERO_WORDS t3, EVAL_WORDS
+
+    la t3, EB
+    ZERO_WORDS t3, EVAL_WORDS
+
+    # EA = A(1) = U0 ^ U1 ^ U2
+    la t3, EA
+    la t4, U0
+    la t5, U1
+    la t6, U2
+    XOR3_WORDS t3, t4, t5, t6, EVAL_WORDS
+
+    # EB = B(1) = V0 ^ V1 ^ V2
+    la t3, EB
+    la t4, V0
+    la t5, V1
+    la t6, V2
+    XOR3_WORDS t3, t4, t5, t6, EVAL_WORDS
+
+    # multiplication here
+
     # write to output
     # WIPE BUFFERS
 
