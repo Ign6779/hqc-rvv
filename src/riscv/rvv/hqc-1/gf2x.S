@@ -9,8 +9,10 @@
 #define TMP_WORDS           565
 #define LAST_WORD_MASK      0x1f
 #define PROD_WORDS          193
+#define PROD_MINUS1_WORDS   192
 
 # HELPER FUNCTIONS
+# rvv zero whatever
 .macro ZERO_WORDS ptr_reg, nwords
     li t0, \nwords
 .L_zero_loop\@:
@@ -25,6 +27,7 @@
 .L_zero_done\@:
 .endm
 
+# rvv copy
 .macro COPY_WORDS dst_reg, src_reg, nwords
     li t0, \nwords
 .L_copy_loop\@:
@@ -40,6 +43,7 @@
 .L_copy_done\@:
 .endm
 
+# rvv v0 ^ v1 ^ v2
 .macro XOR3_WORDS dst_reg, src1_reg, src2_reg, src3_reg, nwords
     li t0, \nwords
 .L_xor3_loop\@:
@@ -61,6 +65,7 @@
 .L_xor3_done\@:
 .endm
 
+# rvv 
 .macro XOR_INTO_WORDS dst_reg, src_reg, nwords
     li t0, \nwords
 .L_xor_into_loop\@:
@@ -76,6 +81,31 @@
     sub t0, t0, t1
     j .L_xor_into_loop\@
 .L_xor_into_done\@:
+.endm
+
+# division by x = X^w, w=64
+.macro DIV_X_WORDS dst_reg, src_reg
+    addi \src_reg, \src_reg, 8
+    COPY_WORDS \dst_reg, \src_reg, PROD_MINUS1_WORDS
+    sd zero, 0(\dst_reg)
+.endm
+
+# division by x + 1
+# there's a dependency chain which sucks
+# look into improving it
+.macro DIV_X_PLUS_1_WORDS dst_reg, src_reg, nwords
+    li t0, \nwords
+    li t1, 0
+.L_div_xp1_loop\@:
+    beqz t0, .L_div_xp1_done\@
+    ld t2, 0(\src_reg)
+    xor t1, t1, t2
+    sd t1, 0(\dst_reg)
+    addi \src_reg, \src_reg, 8
+    addi \dst_reg, \dst_reg, 8
+    addi t0, t0, -1
+    j .L_div_xp1_loop\@
+.L_div_xp1_done\@:
 .endm
 
     .section .bss
@@ -122,6 +152,15 @@ C2:
 C3:
     .zero PROD_WORDS * 8
 C4:
+    .zero PROD_WORDS * 8
+
+T0:
+    .zero PROD_WORDS * 8
+T1:
+    .zero PROD_WORDS * 8
+T2:
+    .zero PROD_WORDS * 8
+T3:
     .zero PROD_WORDS * 8
 
     .text
@@ -180,6 +219,15 @@ rvv_toom3_mul:
     la t3, C3
     ZERO_WORDS t3, PROD_WORDS
     la t3, C4
+    ZERO_WORDS t3, PROD_WORDS
+
+    la t3, T0
+    ZERO_WORDS t3, PROD_WORDS
+    la t3, T1
+    ZERO_WORDS t3, PROD_WORDS
+    la t3, T2
+    ZERO_WORDS t3, PROD_WORDS
+    la t3, T3
     ZERO_WORDS t3, PROD_WORDS
 
 # TOOM3 SPLIT
@@ -401,10 +449,7 @@ rvv_toom3_mul:
     la t4, W4
     COPY_WORDS t3, t4, PROD_WORDS
 
-    
-
 # write to output
-
 
 # WIPE BUFFERS
 # CLEANING SQUAD: RETURN OF THE KING
@@ -447,6 +492,15 @@ rvv_toom3_mul:
     la t3, C3
     ZERO_WORDS t3, PROD_WORDS
     la t3, C4
+    ZERO_WORDS t3, PROD_WORDS
+
+    la t3, T0
+    ZERO_WORDS t3, PROD_WORDS
+    la t3, T1
+    ZERO_WORDS t3, PROD_WORDS
+    la t3, T2
+    ZERO_WORDS t3, PROD_WORDS
+    la t3, T3
     ZERO_WORDS t3, PROD_WORDS
     
 
