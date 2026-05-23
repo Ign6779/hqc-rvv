@@ -637,6 +637,7 @@ rvv_toom3_mul:
     XOR_INTO_WORDS t3, t4, PROD_WORDS
 
     # tmp[376..] ^= C4
+    # sketch af but we ball
     mv t3, s0
     li t5, (4 * TOOM_WORDS) * 8
     add t3, t3, t5

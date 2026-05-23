@@ -31,7 +31,16 @@ extern void rvv_toom3_mul(uint64_t *tmp, const uint64_t *a1, const uint64_t *a2)
  *
  * @brief Modular reduction of a degree < 2n polynomial modulo X^n - 1.
  */
-extern void rvv_reduce(uint64_t *o, const uint64_t *tmp);
+// extern void rvv_reduce(uint64_t *o, const uint64_t *tmp);
+static void reduce(uint64_t *o, const uint64_t *a) {
+    for (size_t i = 0; i < VEC_N_SIZE_64; i++) {
+        uint64_t r = a[i + VEC_N_SIZE_64 - 1] >> (PARAM_N & 0x3F);
+        uint64_t carry = a[i + VEC_N_SIZE_64] << (64 - (PARAM_N & 0x3F));
+        o[i] = a[i] ^ r ^ carry;
+    }
+
+    o[VEC_N_SIZE_64 - 1] &= BITMASK(PARAM_N, 64);
+}
 
 void scalar_mul(uint64_t *r, const uint64_t *a, const uint64_t *b, size_t nwords);
 
