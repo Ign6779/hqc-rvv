@@ -10,6 +10,7 @@
 #define LAST_WORD_MASK      0x1f
 #define PROD_WORDS          193
 
+# HELPER FUNCTIONS
 .macro ZERO_WORDS ptr_reg, nwords
     li t0, \nwords
 .L_zero_loop\@:
@@ -80,6 +81,8 @@
     .section .bss
     .align 3
 
+# BUFFER DECLARATIONS
+# can probably be more efficient with buffer allocations
 U0:
     .zero EVAL_WORDS * 8
 U1:
@@ -110,6 +113,17 @@ W3:
 W4:
     .zero PROD_WORDS * 8
 
+C0:
+    .zero PROD_WORDS * 8
+C1:
+    .zero PROD_WORDS * 8
+C2:
+    .zero PROD_WORDS * 8
+C3:
+    .zero PROD_WORDS * 8
+C4:
+    .zero PROD_WORDS * 8
+
     .text
     .extern scalar_mul
     .globl rvv_toom3_mul
@@ -123,46 +137,49 @@ rvv_toom3_mul:
     mv s0, a0
 
 # CLEANING SQUAD
+# repeats later
     mv t3, a0
     ZERO_WORDS t3, TMP_WORDS
 
     la t3, U0
     ZERO_WORDS t3, EVAL_WORDS
-
     la t3, U1
     ZERO_WORDS t3, EVAL_WORDS
-
     la t3, U2
     ZERO_WORDS t3, EVAL_WORDS
 
     la t3, V0
     ZERO_WORDS t3, EVAL_WORDS
-
     la t3, V1
     ZERO_WORDS t3, EVAL_WORDS
-
     la t3, V2
     ZERO_WORDS t3, EVAL_WORDS
 
     la t3, EA
     ZERO_WORDS t3, EVAL_WORDS
-
     la t3, EB
     ZERO_WORDS t3, EVAL_WORDS
 
     la t3, W0
     ZERO_WORDS t3, PROD_WORDS
-
     la t3, W1
     ZERO_WORDS t3, PROD_WORDS
-
     la t3, W2
     ZERO_WORDS t3, PROD_WORDS
-
     la t3, W3
     ZERO_WORDS t3, PROD_WORDS
-
     la t3, W4
+    ZERO_WORDS t3, PROD_WORDS
+
+    la t3, C0
+    ZERO_WORDS t3, PROD_WORDS
+    la t3, C1
+    ZERO_WORDS t3, PROD_WORDS
+    la t3, C2
+    ZERO_WORDS t3, PROD_WORDS
+    la t3, C3
+    ZERO_WORDS t3, PROD_WORDS
+    la t3, C4
     ZERO_WORDS t3, PROD_WORDS
 
 # TOOM3 SPLIT
@@ -374,7 +391,17 @@ rvv_toom3_mul:
     call scalar_mul
 
 # TOOM3 INTERPOLATION
+    # c0 = C(0) = W0
+    la t3, C0
+    la t4, W0
+    COPY_WORDS t3, t4, PROD_WORDS
 
+    # c4 = C(infinity) = W4
+    la t3, C4
+    la t4, W4
+    COPY_WORDS t3, t4, PROD_WORDS
+
+    
 
 # write to output
 
@@ -409,6 +436,17 @@ rvv_toom3_mul:
     la t3, W3
     ZERO_WORDS t3, PROD_WORDS
     la t3, W4
+    ZERO_WORDS t3, PROD_WORDS
+
+    la t3, C0
+    ZERO_WORDS t3, PROD_WORDS
+    la t3, C1
+    ZERO_WORDS t3, PROD_WORDS
+    la t3, C2
+    ZERO_WORDS t3, PROD_WORDS
+    la t3, C3
+    ZERO_WORDS t3, PROD_WORDS
+    la t3, C4
     ZERO_WORDS t3, PROD_WORDS
     
 
