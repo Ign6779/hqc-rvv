@@ -8,6 +8,7 @@
 #define U2_REAL_WORDS       89
 #define TMP_WORDS           565
 #define LAST_WORD_MASK      0x1f
+#define PROD_WORDS          193
 
 .macro ZERO_WORDS ptr_reg, nwords
     li t0, \nwords
@@ -98,6 +99,17 @@ EA:
 EB:
     .zero EVAL_WORDS * 8
 
+W0:
+    .zero PROD_WORDS * 8
+W1:
+    .zero PROD_WORDS * 8
+W2:
+    .zero PROD_WORDS * 8
+W3:
+    .zero PROD_WORDS * 8
+W4:
+    .zero PROD_WORDS * 8
+
     .text
     .globl rvv_toom3_mul
     .type rvv_toom3_mul, @function
@@ -130,6 +142,21 @@ rvv_toom3_mul:
 
     la t3, EB
     ZERO_WORDS t3, EVAL_WORDS
+
+    la t3, W0
+    ZERO_WORDS t3, PROD_WORDS
+
+    la t3, W1
+    ZERO_WORDS t3, PROD_WORDS
+
+    la t3, W2
+    ZERO_WORDS t3, PROD_WORDS
+
+    la t3, W3
+    ZERO_WORDS t3, PROD_WORDS
+
+    la t3, W4
+    ZERO_WORDS t3, PROD_WORDS
 
 # TOOM3 SPLIT
     # U0 = A + 0 * TOOM_WORDS
@@ -184,6 +211,7 @@ rvv_toom3_mul:
 
 # TOOM EVALUATION
     # already have U0, V0
+    # W0 = U0 * V0
 
     # eval at 1
     la t3, EA
@@ -206,7 +234,7 @@ rvv_toom3_mul:
     la t6, V2
     XOR3_WORDS t3, t4, t5, t6, EVAL_WORDS
 
-    # multiplication here
+    # W1 = EA * EB
 
     # eval at x = X^w, w = 64
     # possible optimizations in changing w
@@ -253,6 +281,8 @@ rvv_toom3_mul:
     addi t3, t3, 16
     la t4, V2
     XOR_INTO_WORDS t3, t4, TOOM_WORDS
+
+    # W2 = EA * EB
 
     # eval at x + 1 = X^64 + 1
     # w may change in optimizations
@@ -306,8 +336,20 @@ rvv_toom3_mul:
     la t4, V2
     XOR_INTO_WORDS t3, t4, TOOM_WORDS
 
+    # W3 = EA * EB
+
+    # already have U2, V2
+    # W4 = U2 * V2
+
     # write to output
     # WIPE BUFFERS
+
+    la t3, EA
+    ZERO_WORDS t3, EVAL_WORDS
+
+    la t3, EB
+    ZERO_WORDS t3, EVAL_WORDS
+    
 
     ret
 
