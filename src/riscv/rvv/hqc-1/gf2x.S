@@ -9,7 +9,6 @@
 #define TMP_WORDS           565
 #define LAST_WORD_MASK      0x1f
 #define PROD_WORDS          193
-#define PROD_MINUS1_WORDS   192
 
 # HELPER FUNCTIONS
 # rvv zero whatever
@@ -86,7 +85,7 @@
 # division by x = X^w, w=64
 .macro DIV_X_WORDS dst_reg, src_reg
     addi \src_reg, \src_reg, 8
-    COPY_WORDS \dst_reg, \src_reg, PROD_MINUS1_WORDS
+    COPY_WORDS \dst_reg, \src_reg, PROD_WORDS-1
     sd zero, 0(\dst_reg)
 .endm
 
@@ -449,7 +448,201 @@ rvv_toom3_mul:
     la t4, W4
     COPY_WORDS t3, t4, PROD_WORDS
 
-# write to output
+    # T0 = W2 ^ C0 ^ (C4 << 4 words)
+    # This removes c0 and c4*x^4 from C(x)
+    la t3, T0
+    ZERO_WORDS t3, PROD_WORDS
+
+    # T0 = W2
+    la t3, T0
+    la t4, W2
+    COPY_WORDS t3, t4, PROD_WORDS
+
+    # T0 ^= C0
+    la t3, T0
+    la t4, C0
+    XOR_INTO_WORDS t3, t4, PROD_WORDS
+
+    # T0 ^= C4 << 4 words
+    # 4 words = x^4, because x = X^64
+    la t3, T0
+    addi t3, t3, 32
+    la t4, C4
+    XOR_INTO_WORDS t3, t4, PROD_WORDS-4
+
+    # T1 = T0 / x
+    la t3, T1
+    ZERO_WORDS t3, PROD_WORDS
+
+    la t3, T1
+    la t4, T0
+    DIV_X_WORDS t3, t4
+
+    # T2 = W3 ^ C0 ^ C4 ^ (C4 << 4 words)
+    # This removes c0 and c4*(x+1)^4 from C(x+1)
+    # Bc (x+1)^4 = x^4 + 1
+    la t3, T2
+    ZERO_WORDS t3, PROD_WORDS
+
+    # T2 = W3
+    la t3, T2
+    la t4, W3
+    COPY_WORDS t3, t4, PROD_WORDS
+
+    # T2 ^= C0
+    la t3, T2
+    la t4, C0
+    XOR_INTO_WORDS t3, t4, PROD_WORDS
+
+    # T2 ^= C4
+    la t3, T2
+    la t4, C4
+    XOR_INTO_WORDS t3, t4, PROD_WORDS
+
+    # T2 ^= C4*x^4
+    la t3, T2
+    addi t3, t3, 32
+    la t4, C4
+    XOR_INTO_WORDS t3, t4, PROD_WORDS-4
+
+    # T3 = T2 / (x + 1)
+    la t3, T3
+    ZERO_WORDS t3, PROD_WORDS
+
+    la t3, T3
+    la t4, T2
+    DIV_X_PLUS_1_WORDS t3, t4, PROD_WORDS
+
+    # T0 = T1 ^ T3
+    # After this:
+    # T0 = c2 ^ c3
+    la t3, T0
+    ZERO_WORDS t3, PROD_WORDS
+
+    la t3, T0
+    la t4, T1
+    COPY_WORDS t3, t4, PROD_WORDS
+
+    la t3, T0
+    la t4, T3
+    XOR_INTO_WORDS t3, t4, PROD_WORDS
+
+
+    # C1 = W1 ^ C0 ^ C4 ^ T0
+    # Since:
+    # W1 = c0 ^ c1 ^ c2 ^ c3 ^ c4
+    # T0 = c2 ^ c3
+    # Therefore:
+    # C1 = c1
+    la t3, C1
+    ZERO_WORDS t3, PROD_WORDS
+
+    la t3, C1
+    la t4, W1
+    COPY_WORDS t3, t4, PROD_WORDS
+
+    la t3, C1
+    la t4, C0
+    XOR_INTO_WORDS t3, t4, PROD_WORDS
+
+    la t3, C1
+    la t4, C4
+    XOR_INTO_WORDS t3, t4, PROD_WORDS
+
+    la t3, C1
+    la t4, T0
+    XOR_INTO_WORDS t3, t4, PROD_WORDS
+
+
+    # T2 = T1 ^ C1
+    # T2 = c2*x ^ c3*x^2
+    la t3, T2
+    ZERO_WORDS t3, PROD_WORDS
+
+    la t3, T2
+    la t4, T1
+    COPY_WORDS t3, t4, PROD_WORDS
+
+    la t3, T2
+    la t4, C1
+    XOR_INTO_WORDS t3, t4, PROD_WORDS
+
+
+    # T2 = T2 / x
+    # T2 = c2 ^ c3*x
+    la t3, T2
+    la t4, T2
+    DIV_X_WORDS t3, t4
+
+
+    # T2 ^= T0
+    # T2 = (c2 ^ c3*x) ^ (c2 ^ c3)
+    # T2 = c3*x ^ c3
+    # T2 = c3*(x+1)
+    la t3, T2
+    la t4, T0
+    XOR_INTO_WORDS t3, t4, PROD_WORDS
+
+
+    # C3 = T2 / (x + 1)
+    # C3 = c3
+    la t3, C3
+    ZERO_WORDS t3, PROD_WORDS
+
+    la t3, C3
+    la t4, T2
+    DIV_X_PLUS_1_WORDS t3, t4, PROD_WORDS
+
+
+    # C2 = T0 ^ C3
+    # Since T0 = c2 ^ c3:
+    # C2 = c2
+    la t3, C2
+    ZERO_WORDS t3, PROD_WORDS
+
+    la t3, C2
+    la t4, T0
+    COPY_WORDS t3, t4, PROD_WORDS
+
+    la t3, C2
+    la t4, C3
+    XOR_INTO_WORDS t3, t4, PROD_WORDS
+
+# TOOM3 RECOMPOSITION
+    # tmp = C0 ^ (C1 << 94 words) ^ (C2 << 188 words) ^ (C3 << 282 words) ^ (C4 << 376 words)
+    # tmp ^= C0
+    mv t3, s0
+    la t4, C0
+    XOR_INTO_WORDS t3, t4, PROD_WORDS
+
+    # tmp[94..] ^= C1
+    mv t3, s0
+    li t5, TOOM_WORDS * 8
+    add t3, t3, t5
+    la t4, C1
+    XOR_INTO_WORDS t3, t4, PROD_WORDS
+
+    # tmp[188..] ^= C2
+    mv t3, s0
+    li t5, (2 * TOOM_WORDS) * 8
+    add t3, t3, t5
+    la t4, C2
+    XOR_INTO_WORDS t3, t4, PROD_WORDS
+
+    # tmp[282..] ^= C3
+    mv t3, s0
+    li t5, (3 * TOOM_WORDS) * 8
+    add t3, t3, t5
+    la t4, C3
+    XOR_INTO_WORDS t3, t4, PROD_WORDS
+
+    # tmp[376..] ^= C4
+    mv t3, s0
+    li t5, (4 * TOOM_WORDS) * 8
+    add t3, t3, t5
+    la t4, C4
+    XOR_INTO_WORDS t3, t4, TMP_WORDS - (4 * TOOM_WORDS)
+
 
 # WIPE BUFFERS
 # CLEANING SQUAD: RETURN OF THE KING
