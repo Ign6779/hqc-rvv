@@ -216,7 +216,7 @@ rvv_toom3_mul:
     and t4, t4, t5
     sd t4, 88 * 8(t3)
 
-# TOOM EVALUATION
+# TOOM3 EVALUATION
     # already have U0, V0
     # W0 = U0 * V0
     la a0, W0
@@ -373,9 +373,14 @@ rvv_toom3_mul:
     li a3, EVAL_WORDS
     call scalar_mul
 
-    # write to output
-    # WIPE BUFFERS
+# TOOM3 INTERPOLATION
 
+
+# write to output
+
+
+# WIPE BUFFERS
+# CLEANING SQUAD: RETURN OF THE KING
     la t3, U0
     ZERO_WORDS t3, EVAL_WORDS
     la t3, U1
