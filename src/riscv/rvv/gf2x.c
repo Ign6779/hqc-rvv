@@ -33,7 +33,7 @@ extern void rvv_toom3_mul(uint64_t *tmp, const uint64_t *a1, const uint64_t *a2)
  */
 extern void rvv_reduce(uint64_t *o, const uint64_t *tmp);
 
-void scalar_mult(uint64_t *r, const uint64_t *a, const uint64_t *b, size_t nwords);
+void scalar_mul(uint64_t *r, const uint64_t *a, const uint64_t *b, size_t nwords);
 
 /**
  * @brief Scalar bottom multiplication over GF(2)[X].
@@ -46,7 +46,7 @@ void scalar_mult(uint64_t *r, const uint64_t *a, const uint64_t *b, size_t nword
  *
  * temporary
  */
-void scalar_mult(uint64_t *r, const uint64_t *a, const uint64_t *b, size_t nwords) {
+void scalar_mul(uint64_t *r, const uint64_t *a, const uint64_t *b, size_t nwords) {
     memset(r, 0, (2 * nwords + 1) * sizeof(uint64_t));
 
     for (size_t i = 0; i < nwords; i++) {

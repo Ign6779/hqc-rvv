@@ -111,10 +111,17 @@ W4:
     .zero PROD_WORDS * 8
 
     .text
+    .extern scalar_mul
     .globl rvv_toom3_mul
     .type rvv_toom3_mul, @function
 
 rvv_toom3_mul:
+    addi sp, sp, -16
+    sd ra, 8(sp)
+    sd s0, 0(sp)
+
+    mv s0, a0
+
 # CLEANING SQUAD
     mv t3, a0
     ZERO_WORDS t3, TMP_WORDS
@@ -212,6 +219,11 @@ rvv_toom3_mul:
 # TOOM EVALUATION
     # already have U0, V0
     # W0 = U0 * V0
+    la a0, W0
+    la a1, U0
+    la a2, V0
+    li a3, EVAL_WORDS
+    call scalar_mul
 
     # eval at 1
     la t3, EA
@@ -235,6 +247,11 @@ rvv_toom3_mul:
     XOR3_WORDS t3, t4, t5, t6, EVAL_WORDS
 
     # W1 = EA * EB
+    la a0, W1
+    la a1, EA
+    la a2, EB
+    li a3, EVAL_WORDS
+    call scalar_mul
 
     # eval at x = X^w, w = 64
     # possible optimizations in changing w
@@ -283,6 +300,11 @@ rvv_toom3_mul:
     XOR_INTO_WORDS t3, t4, TOOM_WORDS
 
     # W2 = EA * EB
+    la a0, W2
+    la a1, EA
+    la a2, EB
+    li a3, EVAL_WORDS
+    call scalar_mul
 
     # eval at x + 1 = X^64 + 1
     # w may change in optimizations
@@ -337,20 +359,57 @@ rvv_toom3_mul:
     XOR_INTO_WORDS t3, t4, TOOM_WORDS
 
     # W3 = EA * EB
+    la a0, W3
+    la a1, EA
+    la a2, EB
+    li a3, EVAL_WORDS
+    call scalar_mul
 
     # already have U2, V2
     # W4 = U2 * V2
+    la a0, W4
+    la a1, U2
+    la a2, V2
+    li a3, EVAL_WORDS
+    call scalar_mul
 
     # write to output
     # WIPE BUFFERS
 
+    la t3, U0
+    ZERO_WORDS t3, EVAL_WORDS
+    la t3, U1
+    ZERO_WORDS t3, EVAL_WORDS
+    la t3, U2
+    ZERO_WORDS t3, EVAL_WORDS
+
+    la t3, V0
+    ZERO_WORDS t3, EVAL_WORDS
+    la t3, V1
+    ZERO_WORDS t3, EVAL_WORDS
+    la t3, V2
+    ZERO_WORDS t3, EVAL_WORDS
+
     la t3, EA
     ZERO_WORDS t3, EVAL_WORDS
-
     la t3, EB
     ZERO_WORDS t3, EVAL_WORDS
+
+    la t3, W0
+    ZERO_WORDS t3, PROD_WORDS
+    la t3, W1
+    ZERO_WORDS t3, PROD_WORDS
+    la t3, W2
+    ZERO_WORDS t3, PROD_WORDS
+    la t3, W3
+    ZERO_WORDS t3, PROD_WORDS
+    la t3, W4
+    ZERO_WORDS t3, PROD_WORDS
     
 
+    ld s0, 0(sp)
+    ld ra, 8(sp)
+    addi sp, sp, 16
     ret
 
     .size rvv_toom3_mul, .-rvv_toom3_mul
