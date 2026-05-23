@@ -208,7 +208,7 @@ rvv_toom3_mul:
 
     # multiplication here
 
-    # eval at x = X^w w = 64
+    # eval at x = X^w, w = 64
     # possible optimizations in changing w
     la t3, EA
     ZERO_WORDS t3, EVAL_WORDS
@@ -249,6 +249,58 @@ rvv_toom3_mul:
 
     # EB[2..95] ^= V2[0..93]
     # can possibly reduce this
+    la t3, EB
+    addi t3, t3, 16
+    la t4, V2
+    XOR_INTO_WORDS t3, t4, TOOM_WORDS
+
+    # eval at x + 1 = X^64 + 1
+    # w may change in optimizations
+    la t3, EA
+    ZERO_WORDS t3, EVAL_WORDS
+
+    la t3, EB
+    ZERO_WORDS t3, EVAL_WORDS
+
+    # EA = A(x+1) = U0 ^ U1 ^ U2 ^ (U1 << 64) ^ (U2 << 128)
+    # EA = U0 ^ U1 ^ U2
+    la t3, EA
+    la t4, U0
+    la t5, U1
+    la t6, U2
+    XOR3_WORDS t3, t4, t5, t6, EVAL_WORDS
+
+    # EA ^= U1 << 64
+    # EA[1..94] ^= U1[0..93]
+    la t3, EA
+    addi t3, t3, 8
+    la t4, U1
+    XOR_INTO_WORDS t3, t4, TOOM_WORDS
+
+    # EA ^= U2 << 128
+    # EA[2..95] ^= U2[0..93]
+    la t3, EA
+    addi t3, t3, 16
+    la t4, U2
+    XOR_INTO_WORDS t3, t4, TOOM_WORDS
+
+    # EB = B(x+1) = V0 ^ V1 ^ V2 ^ (V1 << 64) ^ (V2 << 128)
+    # EB = V0 ^ V1 ^ V2
+    la t3, EB
+    la t4, V0
+    la t5, V1
+    la t6, V2
+    XOR3_WORDS t3, t4, t5, t6, EVAL_WORDS
+
+    # EB ^= V1 << 64
+    # EB[1..94] ^= V1[0..93]
+    la t3, EB
+    addi t3, t3, 8
+    la t4, V1
+    XOR_INTO_WORDS t3, t4, TOOM_WORDS
+
+    # EB ^= V2 << 128
+    # EB[2..95] ^= V2[0..93]
     la t3, EB
     addi t3, t3, 16
     la t4, V2
