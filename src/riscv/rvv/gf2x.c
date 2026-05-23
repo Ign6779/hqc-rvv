@@ -98,7 +98,8 @@ void vect_mul(uint64_t *o, const uint64_t *a1, const uint64_t *a2)
     memset(tmp, 0, sizeof(tmp));
 
     rvv_toom3_mul(tmp, a1, a2);
-    rvv_reduce(o, tmp);
+    // rvv_reduce(o, tmp);
+    reduce(o, tmp);
 
     memset(tmp, 0, sizeof(tmp));
 }
