@@ -721,3 +721,208 @@ rvv_kara6_mul:
     ret
 
     .size rvv_kara6_mul, .-rvv_kara6_mul
+
+# KARATSUBA_6 SCALAR
+    .globl scalar_kara6_mul
+    .type scalar_kara6_mul, @function
+
+scalar_kara6_mul:
+    addi sp, sp, -32
+    sd ra, 24(sp)
+    sd s0, 16(sp)
+    sd s1, 8(sp)
+    sd s2, 0(sp)
+
+    mv s0, a0
+    mv s1, a1
+    mv s2, a2
+
+    # TA = A0 ^ A1
+    la t3, K6_TA
+
+    ld t0, 0(s1)
+    ld t1, 24(s1)
+    xor t0, t0, t1
+    sd t0, 0(t3)
+
+    ld t0, 8(s1)
+    ld t1, 32(s1)
+    xor t0, t0, t1
+    sd t0, 8(t3)
+
+    ld t0, 16(s1)
+    ld t1, 40(s1)
+    xor t0, t0, t1
+    sd t0, 16(t3)
+
+    # TB = B0 ^ B1
+    la t3, K6_TB
+
+    ld t0, 0(s2)
+    ld t1, 24(s2)
+    xor t0, t0, t1
+    sd t0, 0(t3)
+
+    ld t0, 8(s2)
+    ld t1, 32(s2)
+    xor t0, t0, t1
+    sd t0, 8(t3)
+
+    ld t0, 16(s2)
+    ld t1, 40(s2)
+    xor t0, t0, t1
+    sd t0, 16(t3)
+
+    # Z0 = A0 * B0
+    la a0, K6_Z0
+    mv a1, s1
+    mv a2, s2
+    call gf2x_mul3_leaf
+
+    # Z2 = A1 * B1
+    la a0, K6_Z2
+    addi a1, s1, 24
+    addi a2, s2, 24
+    call gf2x_mul3_leaf
+
+    # ZM = TA * TB
+    la a0, K6_ZM
+    la a1, K6_TA
+    la a2, K6_TB
+    call gf2x_mul3_leaf
+
+    # M = ZM ^ Z0 ^ Z2
+    la t3, K6_ZM
+    la t4, K6_Z0
+    la t5, K6_Z2
+
+    ld t0, 0(t3)
+    ld t1, 0(t4)
+    xor t0, t0, t1
+    ld t1, 0(t5)
+    xor t0, t0, t1
+    sd t0, 0(t3)
+
+    ld t0, 8(t3)
+    ld t1, 8(t4)
+    xor t0, t0, t1
+    ld t1, 8(t5)
+    xor t0, t0, t1
+    sd t0, 8(t3)
+
+    ld t0, 16(t3)
+    ld t1, 16(t4)
+    xor t0, t0, t1
+    ld t1, 16(t5)
+    xor t0, t0, t1
+    sd t0, 16(t3)
+
+    ld t0, 24(t3)
+    ld t1, 24(t4)
+    xor t0, t0, t1
+    ld t1, 24(t5)
+    xor t0, t0, t1
+    sd t0, 24(t3)
+
+    ld t0, 32(t3)
+    ld t1, 32(t4)
+    xor t0, t0, t1
+    ld t1, 32(t5)
+    xor t0, t0, t1
+    sd t0, 32(t3)
+
+    ld t0, 40(t3)
+    ld t1, 40(t4)
+    xor t0, t0, t1
+    ld t1, 40(t5)
+    xor t0, t0, t1
+    sd t0, 40(t3)
+
+    ld t0, 48(t3)
+    ld t1, 48(t4)
+    xor t0, t0, t1
+    ld t1, 48(t5)
+    xor t0, t0, t1
+    sd t0, 48(t3)
+
+# RECOMPOSITION
+    la t3, K6_Z0
+    la t4, K6_ZM
+    la t5, K6_Z2
+
+    # out[0] = Z0[0]
+    ld t0, 0(t3)
+    sd t0, 0(s0)
+
+    # out[1] = Z0[1]
+    ld t0, 8(t3)
+    sd t0, 8(s0)
+
+    # out[2] = Z0[2]
+    ld t0, 16(t3)
+    sd t0, 16(s0)
+
+    # out[3] = Z0[3] ^ M[0]
+    ld t0, 24(t3)
+    ld t1, 0(t4)
+    xor t0, t0, t1
+    sd t0, 24(s0)
+
+    # out[4] = Z0[4] ^ M[1]
+    ld t0, 32(t3)
+    ld t1, 8(t4)
+    xor t0, t0, t1
+    sd t0, 32(s0)
+
+    # out[5] = Z0[5] ^ M[2]
+    ld t0, 40(t3)
+    ld t1, 16(t4)
+    xor t0, t0, t1
+    sd t0, 40(s0)
+
+    # out[6] = Z0[6] ^ M[3] ^ Z2[0]
+    ld t0, 48(t3)
+    ld t1, 24(t4)
+    xor t0, t0, t1
+    ld t1, 0(t5)
+    xor t0, t0, t1
+    sd t0, 48(s0)
+
+    # out[7] = M[4] ^ Z2[1]
+    ld t0, 32(t4)
+    ld t1, 8(t5)
+    xor t0, t0, t1
+    sd t0, 56(s0)
+
+    # out[8] = M[5] ^ Z2[2]
+    ld t0, 40(t4)
+    ld t1, 16(t5)
+    xor t0, t0, t1
+    sd t0, 64(s0)
+
+    # out[9] = M[6] ^ Z2[3]
+    ld t0, 48(t4)
+    ld t1, 24(t5)
+    xor t0, t0, t1
+    sd t0, 72(s0)
+
+    # out[10] = Z2[4]
+    ld t0, 32(t5)
+    sd t0, 80(s0)
+
+    # out[11] = Z2[5]
+    ld t0, 40(t5)
+    sd t0, 88(s0)
+
+    # out[12] = Z2[6]
+    ld t0, 48(t5)
+    sd t0, 96(s0)
+
+    ld s2, 0(sp)
+    ld s1, 8(sp)
+    ld s0, 16(sp)
+    ld ra, 24(sp)
+    addi sp, sp, 32
+    ret
+
+    .size scalar_kara6_mul, .-scalar_kara6_mul
