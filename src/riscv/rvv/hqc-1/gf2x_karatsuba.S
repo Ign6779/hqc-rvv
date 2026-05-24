@@ -520,7 +520,7 @@ rvv_kara12_mul:
     mv a1, s1
     mv a2, s2
     # li a3, K12_HALF_WORDS
-    call rvv_kara6_mul
+    call scalar_kara6_mul
 
     # Z2 = A1 * B1
     la a0, K12_Z2
@@ -532,14 +532,14 @@ rvv_kara12_mul:
     addi a2, a2, K12_HALF_WORDS * 8
 
     # li a3, K12_HALF_WORDS
-    call rvv_kara6_mul
+    call scalar_kara6_mul
 
     # ZM = TA * TB
     la a0, K12_ZM
     la a1, K12_TA
     la a2, K12_TB
     # li a3, K12_HALF_WORDS
-    call rvv_kara6_mul
+    call scalar_kara6_mul
 
     # middle = ZM ^ Z0 ^ Z2
     la t3, K12_ZM
