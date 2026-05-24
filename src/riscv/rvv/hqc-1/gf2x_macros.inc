@@ -1,5 +1,3 @@
-#include "parameters.h"
-
 #ifndef GF2X_MACROS_INC
 #define GF2X_MACROS_INC
 
@@ -8,13 +6,12 @@
 #define VSETVLI_E32_M1(rd, rs1)  .insn i 0x57, 0x7, rd, rs1, 8
 #define VSETVLI_E64_M1(rd, rs1)  .insn i 0x57, 0x7, rd, rs1, 12
 
-#define GF2X_PAD_WORDS        (PARAM_N_MULT / 64)
-#define TOOM_WORDS            (GF2X_PAD_WORDS / 3)
-#define EVAL_WORDS            (TOOM_WORDS + 2)
-#define U2_REAL_WORDS         (VEC_N_SIZE_64 - (2 * TOOM_WORDS))
-#define TMP_WORDS             (2 * GF2X_PAD_WORDS + 1)
-#define LAST_WORD_MASK        BITMASK(PARAM_N, 64)
-#define PROD_WORDS            (2 * EVAL_WORDS + 1)
+#define TOOM_WORDS          94
+#define EVAL_WORDS          96
+#define U2_REAL_WORDS       89
+#define TMP_WORDS           565
+#define LAST_WORD_MASK      0x1f
+#define PROD_WORDS          193
 
 #define K96_WORDS             EVAL_WORDS
 #define K96_HALF_WORDS        (K96_WORDS / 2)
@@ -47,6 +44,24 @@
     sub t0, t0, t1
     j .L_copy_loop\@
 .L_copy_done\@:
+.endm
+
+.macro XOR2_WORDS dst_reg, src1_reg, src2_reg, nwords
+    li t0, \nwords
+.L_xor2_loop\@:
+    beqz t0, .L_xor2_done\@
+    VSETVLI_E64_M1(t1, t0)
+    vle64.v v0, (\src1_reg)
+    vle64.v v1, (\src2_reg)
+    vxor.vv v2, v0, v1
+    vse64.v v2, (\dst_reg)
+    slli t2, t1, 3
+    add \src1_reg, \src1_reg, t2
+    add \src2_reg, \src2_reg, t2
+    add \dst_reg, \dst_reg, t2
+    sub t0, t0, t1
+    j .L_xor2_loop\@
+.L_xor2_done\@:
 .endm
 
 .macro XOR3_WORDS dst_reg, src1_reg, src2_reg, src3_reg, nwords
