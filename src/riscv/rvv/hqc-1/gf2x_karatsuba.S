@@ -46,7 +46,7 @@ K24_ZM:
 
 
     .text
-    .extern rvv_leaf_mul
+    .extern scalar_mul
 
 # KARATSUBA_96
     .globl rvv_kara96_mul
@@ -359,7 +359,7 @@ rvv_kara24_mul:
     mv a1, s1
     mv a2, s2
     li a3, K24_HALF_WORDS
-    call rvv_leaf_mul
+    call scalar_mul
 
 
     # Z2 = A1 * B1
@@ -372,15 +372,15 @@ rvv_kara24_mul:
     addi a2, a2, K24_HALF_WORDS * 8
 
     li a3, K24_HALF_WORDS
-    call rvv_leaf_mul
+    call scalar_mul
 
     # ZM = TA * TB 
     la a0, K24_ZM
     la a1, K24_TA
     la a2, K24_TB
     li a3, K24_HALF_WORDS
-    call rvv_leaf_mul
-
+    call scalar_mul
+    
     # middle = ZM ^ Z0 ^ Z2
     la t3, K24_ZM
     la t4, K24_Z0
