@@ -44,43 +44,6 @@ static void reduce(uint64_t *o, const uint64_t *a) {
 
 void scalar_mul(uint64_t *r, const uint64_t *a, const uint64_t *b, size_t nwords);
 
-/**
- * @brief Scalar bottom multiplication over GF(2)[X].
- *
- * Computes:
- *   r = a * b
- *
- * where a and b each contain nwords 64-bit words.
- * r must have room for 2 * nwords + 1 words.
- *
- * temporary
- */
-void scalar_mul(uint64_t *r, const uint64_t *a, const uint64_t *b, size_t nwords) {
-    memset(r, 0, (2 * nwords + 1) * sizeof(uint64_t));
-
-    for (size_t i = 0; i < nwords; i++) {
-        uint64_t ai = a[i];
-
-        for (unsigned bit = 0; bit < 64; bit++) {
-            uint64_t mask = (uint64_t)0 - ((ai >> bit) & 1ULL);
-
-            if (bit == 0) {
-                for (size_t j = 0; j < nwords; j++) {
-                    r[i + j] ^= b[j] & mask;
-                }
-            } else {
-                unsigned inv = 64U - bit;
-
-                for (size_t j = 0; j < nwords; j++) {
-                    uint64_t bj = b[j] & mask;
-
-                    r[i + j]     ^= bj << bit;
-                    r[i + j + 1] ^= bj >> inv;
-                }
-            }
-        }
-    }
-}
 
 /**
  * @brief Multiply two polynomials modulo X^n - 1.
