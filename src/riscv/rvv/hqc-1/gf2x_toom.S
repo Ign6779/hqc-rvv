@@ -55,7 +55,7 @@ T3:
     .zero PROD_WORDS * 8
 
     .text
-    .extern rvv_base_mul
+    .extern rvv_toom_base_mul
     .globl rvv_toom3_mul
     .type rvv_toom3_mul, @function
 
@@ -179,7 +179,7 @@ rvv_toom3_mul:
     la a1, U0
     la a2, V0
     li a3, EVAL_WORDS
-    call rvv_base_mul
+    call rvv_toom_base_mul
 
     # eval at 1
     la t3, EA
@@ -207,7 +207,7 @@ rvv_toom3_mul:
     la a1, EA
     la a2, EB
     li a3, EVAL_WORDS
-    call rvv_base_mul
+    call rvv_toom_base_mul
 
     # eval at x = X^w, w = 64
     # possible optimizations in changing w
@@ -260,7 +260,7 @@ rvv_toom3_mul:
     la a1, EA
     la a2, EB
     li a3, EVAL_WORDS
-    call rvv_base_mul
+    call rvv_toom_base_mul
 
     # eval at x + 1 = X^64 + 1
     # w may change in optimizations
@@ -319,7 +319,7 @@ rvv_toom3_mul:
     la a1, EA
     la a2, EB
     li a3, EVAL_WORDS
-    call rvv_base_mul
+    call rvv_toom_base_mul
 
     # already have U2, V2
     # W4 = U2 * V2
@@ -327,7 +327,7 @@ rvv_toom3_mul:
     la a1, U2
     la a2, V2
     li a3, EVAL_WORDS
-    call rvv_base_mul
+    call rvv_toom_base_mul
 
 # TOOM3 INTERPOLATION
     # c0 = C(0) = W0

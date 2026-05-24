@@ -1,3 +1,5 @@
+#include "parameters.h"
+
 #ifndef GF2X_MACROS_INC
 #define GF2X_MACROS_INC
 
@@ -6,12 +8,17 @@
 #define VSETVLI_E32_M1(rd, rs1)  .insn i 0x57, 0x7, rd, rs1, 8
 #define VSETVLI_E64_M1(rd, rs1)  .insn i 0x57, 0x7, rd, rs1, 12
 
-#define TOOM_WORDS          94
-#define EVAL_WORDS          96
-#define U2_REAL_WORDS       89
-#define TMP_WORDS           565
-#define LAST_WORD_MASK      0x1f
-#define PROD_WORDS          193
+#define GF2X_PAD_WORDS        (PARAM_N_MULT / 64)
+#define TOOM_WORDS            (GF2X_PAD_WORDS / 3)
+#define EVAL_WORDS            (TOOM_WORDS + 2)
+#define U2_REAL_WORDS         (VEC_N_SIZE_64 - (2 * TOOM_WORDS))
+#define TMP_WORDS             (2 * GF2X_PAD_WORDS + 1)
+#define LAST_WORD_MASK        BITMASK(PARAM_N, 64)
+#define PROD_WORDS            (2 * EVAL_WORDS + 1)
+
+#define K96_WORDS             EVAL_WORDS
+#define K96_HALF_WORDS        (K96_WORDS / 2)
+#define K96_SUBPROD_WORDS     (2 * K96_HALF_WORDS + 1)
 
 .macro ZERO_WORDS ptr_reg, nwords
     li t0, \nwords
