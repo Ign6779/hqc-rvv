@@ -29,6 +29,10 @@
 #define K12_HALF_WORDS        (K12_WORDS / 2)
 #define K12_SUBPROD_WORDS     (2 * K12_HALF_WORDS + 1)
 
+#define K6_WORDS              K12_HALF_WORDS
+#define K6_HALF_WORDS         (K6_WORDS / 2)
+#define K6_SUBPROD_WORDS      (2 * K6_HALF_WORDS + 1)
+
 .macro ZERO_WORDS ptr_reg, nwords
     li t0, \nwords
 .L_zero_loop\@:
