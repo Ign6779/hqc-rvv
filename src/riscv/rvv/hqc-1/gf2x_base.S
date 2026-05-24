@@ -1,7 +1,7 @@
 #include "gf2x_macros.inc"
 
     .text
-    .extern scalar_mul
+    .extern rvv_kara96_mul
     .globl rvv_toom_base_mul
     .type rvv_toom_base_mul, @function
 
@@ -15,7 +15,7 @@ rvv_toom_base_mul:
     sd ra, 8(sp)
     sd s0, 0(sp)
 
-    call scalar_mul
+    call rvv_kara96_mul
 
     ld s0, 0(sp)
     ld ra, 8(sp)

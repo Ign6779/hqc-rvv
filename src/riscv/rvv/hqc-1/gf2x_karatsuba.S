@@ -1,28 +1,152 @@
 #include "gf2x_macros.inc"
 
+    .section .bss
+    .align 3
+
+# Temporary buffers# B = B0 + B1 * X^(48 words)
+
+K96_TA:
+    .zero K96_HALF_WORDS * 8
+K96_TB:
+    .zero K96_HALF_WORDS * 8
+
+K96_Z0:
+    .zero K96_SUBPROD_WORDS * 8
+K96_Z2:
+    .zero K96_SUBPROD_WORDS * 8
+
+K96_ZM:
+    .zero K96_SUBPROD_WORDS * 8
+
+
     .text
     .extern scalar_mul
 
     .globl rvv_kara96_mul
     .type rvv_kara96_mul, @function
 
-# void rvv_kara96_mul(uint64_t *out, const uint64_t *a, const uint64_t *b)
-# a0 = out
-# a1 = a
-# a2 = b
-rvv_kara96_mul:
-    addi sp, sp, -16
-    sd ra, 8(sp)
-    sd s0, 0(sp)
 
-    # fallback:
-    # call scalar_mul(out, a, b, 96)
-    li a3, EVAL_WORDS
+rvv_kara96_mul:
+    addi sp, sp, -32
+    sd ra, 24(sp)
+    sd s0, 16(sp)
+    sd s1, 8(sp)
+    sd s2, 0(sp)
+
+    mv s0, a0
+    mv s1, a1
+    mv s2, a2
+
+# CLEANING DUTYYY
+    mv t3, s0
+    ZERO_WORDS t3, PROD_WORDS
+
+    la t3, K96_TA
+    ZERO_WORDS t3, K96_HALF_WORDS
+
+    la t3, K96_TB
+    ZERO_WORDS t3, K96_HALF_WORDS
+
+    la t3, K96_Z0
+    ZERO_WORDS t3, K96_SUBPROD_WORDS
+
+    la t3, K96_Z2
+    ZERO_WORDS t3, K96_SUBPROD_WORDS
+
+    la t3, K96_ZM
+    ZERO_WORDS t3, K96_SUBPROD_WORDS
+
+
+# TA = A0 ^ A1
+    la t3, K96_TA
+    mv t4, s1
+    mv t5, s1
+    addi t5, t5, K96_HALF_WORDS * 8
+    XOR2_WORDS t3, t4, t5, K96_HALF_WORDS
+
+# TB = B0 ^ B1
+    la t3, K96_TB
+    mv t4, s2
+    mv t5, s2
+    addi t5, t5, K96_HALF_WORDS * 8
+    XOR2_WORDS t3, t4, t5, K96_HALF_WORDS
+
+# Z0 = A0 * B0
+    la a0, K96_Z0
+    mv a1, s1
+    mv a2, s2
+    li a3, K96_HALF_WORDS
     call scalar_mul
 
-    ld s0, 0(sp)
-    ld ra, 8(sp)
-    addi sp, sp, 16
+# Z2 = A1 * B1
+    la a0, K96_Z2
+
+    mv a1, s1
+    addi a1, a1, K96_HALF_WORDS * 8
+
+    mv a2, s2
+    addi a2, a2, K96_HALF_WORDS * 8
+
+    li a3, K96_HALF_WORDS
+    call scalar_mul
+
+
+# ZM = TA * TB
+    la a0, K96_ZM
+    la a1, K96_TA
+    la a2, K96_TB
+    li a3, K96_HALF_WORDS
+    call scalar_mul
+
+# middle = ZM ^ Z0 ^ Z2
+    la t3, K96_ZM
+    la t4, K96_Z0
+    XOR_INTO_WORDS t3, t4, K96_SUBPROD_WORDS
+
+    la t3, K96_ZM
+    la t4, K96_Z2
+    XOR_INTO_WORDS t3, t4, K96_SUBPROD_WORDS
+
+# RECOMPOSITION
+    # out ^= Z0
+    mv t3, s0
+    la t4, K96_Z0
+    XOR_INTO_WORDS t3, t4, K96_SUBPROD_WORDS
+
+    # out[48..] ^= middle
+    mv t3, s0
+    addi t3, t3, K96_HALF_WORDS * 8
+    la t4, K96_ZM
+    XOR_INTO_WORDS t3, t4, K96_SUBPROD_WORDS
+
+    # out[96..] ^= Z2
+    mv t3, s0
+    addi t3, t3, K96_WORDS * 8
+    la t4, K96_Z2
+    XOR_INTO_WORDS t3, t4, K96_SUBPROD_WORDS
+
+# CLEANING DUTY: THE EMPIRE STRIKES BACK
+    la t3, K96_TA
+    ZERO_WORDS t3, K96_HALF_WORDS
+
+    la t3, K96_TB
+    ZERO_WORDS t3, K96_HALF_WORDS
+
+    la t3, K96_Z0
+    ZERO_WORDS t3, K96_SUBPROD_WORDS
+
+    la t3, K96_Z2
+    ZERO_WORDS t3, K96_SUBPROD_WORDS
+
+    la t3, K96_ZM
+    ZERO_WORDS t3, K96_SUBPROD_WORDS
+
+
+    ld s2, 0(sp)
+    ld s1, 8(sp)
+    ld s0, 16(sp)
+    ld ra, 24(sp)
+    addi sp, sp, 32
     ret
 
     .size rvv_kara96_mul, .-rvv_kara96_mul
