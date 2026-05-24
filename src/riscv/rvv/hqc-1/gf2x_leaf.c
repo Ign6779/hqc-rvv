@@ -2,6 +2,10 @@
 #include <stddef.h>
 #include <string.h>
 
+void gf2x_mul3_leaf(uint64_t *restrict r,
+                    const uint64_t *restrict a,
+                    const uint64_t *restrict b);
+
 static inline void shl_b_0(uint64_t out[4], const uint64_t b[3]) {
     out[0] = b[0];
     out[1] = b[1];
@@ -156,7 +160,7 @@ static inline void gf2x_mul3_fast(uint64_t *restrict r,
 }
 
 
-void scalar_mul(uint64_t *restrict r,
+void gf2x_mul3_leaf(uint64_t *restrict r,
                 const uint64_t *restrict a,
                 const uint64_t *restrict b,
                 size_t nwords)
