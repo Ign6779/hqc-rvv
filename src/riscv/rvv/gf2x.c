@@ -42,7 +42,7 @@ static void reduce(uint64_t *o, const uint64_t *a) {
     o[VEC_N_SIZE_64 - 1] &= BITMASK(PARAM_N, 64);
 }
 
-void scalar_mul(uint64_t *r, const uint64_t *a, const uint64_t *b, size_t nwords);
+// void scalar_mul(uint64_t *r, const uint64_t *a, const uint64_t *b, size_t nwords);
 
 
 /**

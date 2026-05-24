@@ -72,7 +72,7 @@ K6_ZM:
 
 
     .text
-    .extern scalar_mul
+    .extern gf2x_mul3_leaf
 
 # KARATSUBA_96
     .globl rvv_kara96_mul
@@ -652,7 +652,7 @@ rvv_kara6_mul:
     mv a1, s1
     mv a2, s2
     li a3, K6_HALF_WORDS
-    call scalar_mul
+    call gf2x_mul3_leaf
 
     # Z2 = A1 * B1
     la a0, K6_Z2
@@ -661,14 +661,14 @@ rvv_kara6_mul:
     mv a2, s2
     addi a2, a2, K6_HALF_WORDS * 8
     li a3, K6_HALF_WORDS
-    call scalar_mul
+    call gf2x_mul3_leaf
 
     # ZM = TA * TB
     la a0, K6_ZM
     la a1, K6_TA
     la a2, K6_TB
     li a3, K6_HALF_WORDS
-    call scalar_mul
+    call gf2x_mul3_leaf
 
     # middle = ZM ^ Z0 ^ Z2
     la t3, K6_ZM
