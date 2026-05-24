@@ -161,37 +161,8 @@ static inline void gf2x_mul3_fast(uint64_t *restrict r,
 
 
 void gf2x_mul3_leaf(uint64_t *restrict r,
-                const uint64_t *restrict a,
-                const uint64_t *restrict b,
-                size_t nwords)
+                    const uint64_t *restrict a,
+                    const uint64_t *restrict b)
 {
-    if (__builtin_expect(nwords == 3, 1)) {
-        gf2x_mul3_fast(r, a, b);
-        return;
-    }
-
-
-    memset(r, 0, (2 * nwords + 1) * sizeof(uint64_t));
-
-    for (size_t i = 0; i < nwords; i++) {
-        uint64_t ai = a[i];
-
-        for (unsigned bit = 0; bit < 64; bit++) {
-            uint64_t mask = (uint64_t)0 - ((ai >> bit) & 1ULL);
-
-            if (bit == 0) {
-                for (size_t j = 0; j < nwords; j++) {
-                    r[i + j] ^= b[j] & mask;
-                }
-            } else {
-                unsigned inv = 64U - bit;
-
-                for (size_t j = 0; j < nwords; j++) {
-                    uint64_t bj = b[j] & mask;
-                    r[i + j]     ^= bj << bit;
-                    r[i + j + 1] ^= bj >> inv;
-                }
-            }
-        }
-    }
+    gf2x_mul3_fast(r, a, b);
 }
