@@ -93,20 +93,20 @@ rvv_kara96_mul:
     mv t3, s0
     ZERO_WORDS t3, PROD_WORDS
 
-    la t3, K96_TA
-    ZERO_WORDS t3, K96_HALF_WORDS
+    # la t3, K96_TA
+    # ZERO_WORDS t3, K96_HALF_WORDS
 
-    la t3, K96_TB
-    ZERO_WORDS t3, K96_HALF_WORDS
+    # la t3, K96_TB
+    # ZERO_WORDS t3, K96_HALF_WORDS
 
-    la t3, K96_Z0
-    ZERO_WORDS t3, K96_SUBPROD_WORDS
+    # la t3, K96_Z0
+    # ZERO_WORDS t3, K96_SUBPROD_WORDS
 
-    la t3, K96_Z2
-    ZERO_WORDS t3, K96_SUBPROD_WORDS
+    # la t3, K96_Z2
+    # ZERO_WORDS t3, K96_SUBPROD_WORDS
 
-    la t3, K96_ZM
-    ZERO_WORDS t3, K96_SUBPROD_WORDS
+    # la t3, K96_ZM
+    # ZERO_WORDS t3, K96_SUBPROD_WORDS
 
 # DECOMPOSITION
     # TA = A0 ^ A1
@@ -127,7 +127,7 @@ rvv_kara96_mul:
     la a0, K96_Z0
     mv a1, s1
     mv a2, s2
-    li a3, K96_HALF_WORDS
+    # li a3, K96_HALF_WORDS
     call rvv_kara48_mul
 
     # Z2 = A1 * B1
@@ -139,7 +139,7 @@ rvv_kara96_mul:
     mv a2, s2
     addi a2, a2, K96_HALF_WORDS * 8
 
-    li a3, K96_HALF_WORDS
+    # li a3, K96_HALF_WORDS
     call rvv_kara48_mul
 
 
@@ -147,7 +147,7 @@ rvv_kara96_mul:
     la a0, K96_ZM
     la a1, K96_TA
     la a2, K96_TB
-    li a3, K96_HALF_WORDS
+    # li a3, K96_HALF_WORDS
     call rvv_kara48_mul
 
     # middle = ZM ^ Z0 ^ Z2
@@ -178,20 +178,20 @@ rvv_kara96_mul:
     XOR_INTO_WORDS t3, t4, K96_SUBPROD_WORDS
 
 # CLEANING DUTY: THE EMPIRE STRIKES BACK
-    la t3, K96_TA
-    ZERO_WORDS t3, K96_HALF_WORDS
+    # la t3, K96_TA
+    # ZERO_WORDS t3, K96_HALF_WORDS
 
-    la t3, K96_TB
-    ZERO_WORDS t3, K96_HALF_WORDS
+    # la t3, K96_TB
+    # ZERO_WORDS t3, K96_HALF_WORDS
 
-    la t3, K96_Z0
-    ZERO_WORDS t3, K96_SUBPROD_WORDS
+    # la t3, K96_Z0
+    # ZERO_WORDS t3, K96_SUBPROD_WORDS
 
-    la t3, K96_Z2
-    ZERO_WORDS t3, K96_SUBPROD_WORDS
+    # la t3, K96_Z2
+    # ZERO_WORDS t3, K96_SUBPROD_WORDS
 
-    la t3, K96_ZM
-    ZERO_WORDS t3, K96_SUBPROD_WORDS
+    # la t3, K96_ZM
+    # ZERO_WORDS t3, K96_SUBPROD_WORDS
 
 
     ld s2, 0(sp)
@@ -222,20 +222,20 @@ rvv_kara48_mul:
     mv t3, s0
     ZERO_WORDS t3, K96_SUBPROD_WORDS
 
-    la t3, K48_TA
-    ZERO_WORDS t3, K48_HALF_WORDS
+    # la t3, K48_TA
+    # ZERO_WORDS t3, K48_HALF_WORDS
 
-    la t3, K48_TB
-    ZERO_WORDS t3, K48_HALF_WORDS
+    # la t3, K48_TB
+    # ZERO_WORDS t3, K48_HALF_WORDS
 
-    la t3, K48_Z0
-    ZERO_WORDS t3, K48_SUBPROD_WORDS
+    # la t3, K48_Z0
+    # ZERO_WORDS t3, K48_SUBPROD_WORDS
 
-    la t3, K48_Z2
-    ZERO_WORDS t3, K48_SUBPROD_WORDS
+    # la t3, K48_Z2
+    # ZERO_WORDS t3, K48_SUBPROD_WORDS
 
-    la t3, K48_ZM
-    ZERO_WORDS t3, K48_SUBPROD_WORDS
+    # la t3, K48_ZM
+    # ZERO_WORDS t3, K48_SUBPROD_WORDS
 
 # DECOMPOSITION
     # TA = A0 ^ A1
@@ -256,7 +256,7 @@ rvv_kara48_mul:
     la a0, K48_Z0
     mv a1, s1
     mv a2, s2
-    li a3, K48_HALF_WORDS
+    # li a3, K48_HALF_WORDS
     call rvv_kara24_mul
 
     # Z2 = A1 * B1
@@ -268,7 +268,7 @@ rvv_kara48_mul:
     mv a2, s2
     addi a2, a2, K48_HALF_WORDS * 8
 
-    li a3, K48_HALF_WORDS
+    # li a3, K48_HALF_WORDS
     call rvv_kara24_mul
 
 
@@ -276,7 +276,7 @@ rvv_kara48_mul:
     la a0, K48_ZM
     la a1, K48_TA
     la a2, K48_TB
-    li a3, K48_HALF_WORDS
+    # li a3, K48_HALF_WORDS
     call rvv_kara24_mul
 
     # middle = ZM ^ Z0 ^ Z2
@@ -307,20 +307,20 @@ rvv_kara48_mul:
     XOR_INTO_WORDS t3, t4, K48_SUBPROD_WORDS
 
 # THE LORD SAID: LET THE BUFFERS BE CLEAN
-    la t3, K48_TA
-    ZERO_WORDS t3, K48_HALF_WORDS
+    # la t3, K48_TA
+    # ZERO_WORDS t3, K48_HALF_WORDS
 
-    la t3, K48_TB
-    ZERO_WORDS t3, K48_HALF_WORDS
+    # la t3, K48_TB
+    # ZERO_WORDS t3, K48_HALF_WORDS
 
-    la t3, K48_Z0
-    ZERO_WORDS t3, K48_SUBPROD_WORDS
+    # la t3, K48_Z0
+    # ZERO_WORDS t3, K48_SUBPROD_WORDS
 
-    la t3, K48_Z2
-    ZERO_WORDS t3, K48_SUBPROD_WORDS
+    # la t3, K48_Z2
+    # ZERO_WORDS t3, K48_SUBPROD_WORDS
 
-    la t3, K48_ZM
-    ZERO_WORDS t3, K48_SUBPROD_WORDS
+    # la t3, K48_ZM
+    # ZERO_WORDS t3, K48_SUBPROD_WORDS
 
     ld s2, 0(sp)
     ld s1, 8(sp)
@@ -350,20 +350,20 @@ rvv_kara24_mul:
     mv t3, s0
     ZERO_WORDS t3, K48_SUBPROD_WORDS
 
-    la t3, K24_TA
-    ZERO_WORDS t3, K24_HALF_WORDS
+    # la t3, K24_TA
+    # ZERO_WORDS t3, K24_HALF_WORDS
 
-    la t3, K24_TB
-    ZERO_WORDS t3, K24_HALF_WORDS
+    # la t3, K24_TB
+    # ZERO_WORDS t3, K24_HALF_WORDS
 
-    la t3, K24_Z0
-    ZERO_WORDS t3, K24_SUBPROD_WORDS
+    # la t3, K24_Z0
+    # ZERO_WORDS t3, K24_SUBPROD_WORDS
 
-    la t3, K24_Z2
-    ZERO_WORDS t3, K24_SUBPROD_WORDS
+    # la t3, K24_Z2
+    # ZERO_WORDS t3, K24_SUBPROD_WORDS
 
-    la t3, K24_ZM
-    ZERO_WORDS t3, K24_SUBPROD_WORDS
+    # la t3, K24_ZM
+    # ZERO_WORDS t3, K24_SUBPROD_WORDS
 
 # DECOMPOSITION
     # TA = A0 ^ A1
@@ -384,7 +384,7 @@ rvv_kara24_mul:
     la a0, K24_Z0
     mv a1, s1
     mv a2, s2
-    li a3, K24_HALF_WORDS
+    # li a3, K24_HALF_WORDS
     call rvv_kara12_mul
 
 
@@ -397,14 +397,14 @@ rvv_kara24_mul:
     mv a2, s2
     addi a2, a2, K24_HALF_WORDS * 8
 
-    li a3, K24_HALF_WORDS
+    # li a3, K24_HALF_WORDS
     call rvv_kara12_mul
 
     # ZM = TA * TB 
     la a0, K24_ZM
     la a1, K24_TA
     la a2, K24_TB
-    li a3, K24_HALF_WORDS
+    # li a3, K24_HALF_WORDS
     call rvv_kara12_mul
 
     # middle = ZM ^ Z0 ^ Z2
@@ -436,20 +436,20 @@ rvv_kara24_mul:
 
 
 # CLEAN TEMPORARIES
-    la t3, K24_TA
-    ZERO_WORDS t3, K24_HALF_WORDS
+    # la t3, K24_TA
+    # ZERO_WORDS t3, K24_HALF_WORDS
 
-    la t3, K24_TB
-    ZERO_WORDS t3, K24_HALF_WORDS
+    # la t3, K24_TB
+    # ZERO_WORDS t3, K24_HALF_WORDS
 
-    la t3, K24_Z0
-    ZERO_WORDS t3, K24_SUBPROD_WORDS
+    # la t3, K24_Z0
+    # ZERO_WORDS t3, K24_SUBPROD_WORDS
 
-    la t3, K24_Z2
-    ZERO_WORDS t3, K24_SUBPROD_WORDS
+    # la t3, K24_Z2
+    # ZERO_WORDS t3, K24_SUBPROD_WORDS
 
-    la t3, K24_ZM
-    ZERO_WORDS t3, K24_SUBPROD_WORDS
+    # la t3, K24_ZM
+    # ZERO_WORDS t3, K24_SUBPROD_WORDS
 
 
     ld s2, 0(sp)
@@ -481,20 +481,20 @@ rvv_kara12_mul:
     mv t3, s0
     ZERO_WORDS t3, K24_SUBPROD_WORDS
 
-    la t3, K12_TA
-    ZERO_WORDS t3, K12_HALF_WORDS
+    # la t3, K12_TA
+    # ZERO_WORDS t3, K12_HALF_WORDS
 
-    la t3, K12_TB
-    ZERO_WORDS t3, K12_HALF_WORDS
+    # la t3, K12_TB
+    # ZERO_WORDS t3, K12_HALF_WORDS
 
-    la t3, K12_Z0
-    ZERO_WORDS t3, K12_SUBPROD_WORDS
+    # la t3, K12_Z0
+    # ZERO_WORDS t3, K12_SUBPROD_WORDS
 
-    la t3, K12_Z2
-    ZERO_WORDS t3, K12_SUBPROD_WORDS
+    # la t3, K12_Z2
+    # ZERO_WORDS t3, K12_SUBPROD_WORDS
 
-    la t3, K12_ZM
-    ZERO_WORDS t3, K12_SUBPROD_WORDS
+    # la t3, K12_ZM
+    # ZERO_WORDS t3, K12_SUBPROD_WORDS
 
 # DECOMPOSITION
     # TA = A0 ^ A1
@@ -519,7 +519,7 @@ rvv_kara12_mul:
     la a0, K12_Z0
     mv a1, s1
     mv a2, s2
-    li a3, K12_HALF_WORDS
+    # li a3, K12_HALF_WORDS
     call rvv_kara6_mul
 
     # Z2 = A1 * B1
@@ -531,14 +531,14 @@ rvv_kara12_mul:
     mv a2, s2
     addi a2, a2, K12_HALF_WORDS * 8
 
-    li a3, K12_HALF_WORDS
+    # li a3, K12_HALF_WORDS
     call rvv_kara6_mul
 
     # ZM = TA * TB
     la a0, K12_ZM
     la a1, K12_TA
     la a2, K12_TB
-    li a3, K12_HALF_WORDS
+    # li a3, K12_HALF_WORDS
     call rvv_kara6_mul
 
     # middle = ZM ^ Z0 ^ Z2
@@ -563,26 +563,26 @@ rvv_kara12_mul:
     XOR_INTO_WORDS t3, t4, K12_SUBPROD_WORDS
 
     # out[12..] ^= Z2
-    mv t3, s0
+    mv t3, s0# 
     addi t3, t3, K12_WORDS * 8
     la t4, K12_Z2
     XOR_INTO_WORDS t3, t4, K12_SUBPROD_WORDS
 
 # CLEAN TEMPORARIES
-    la t3, K12_TA
-    ZERO_WORDS t3, K12_HALF_WORDS
+    # la t3, K12_TA
+    # ZERO_WORDS t3, K12_HALF_WORDS
 
-    la t3, K12_TB
-    ZERO_WORDS t3, K12_HALF_WORDS
+    # la t3, K12_TB
+    # ZERO_WORDS t3, K12_HALF_WORDS
 
-    la t3, K12_Z0
-    ZERO_WORDS t3, K12_SUBPROD_WORDS
+    # la t3, K12_Z0
+    # ZERO_WORDS t3, K12_SUBPROD_WORDS
 
-    la t3, K12_Z2
-    ZERO_WORDS t3, K12_SUBPROD_WORDS
+    # la t3, K12_Z2
+    # ZERO_WORDS t3, K12_SUBPROD_WORDS
 
-    la t3, K12_ZM
-    ZERO_WORDS t3, K12_SUBPROD_WORDS
+    # la t3, K12_ZM
+    # ZERO_WORDS t3, K12_SUBPROD_WORDS
 
     ld s2, 0(sp)
     ld s1, 8(sp)
@@ -613,20 +613,20 @@ rvv_kara6_mul:
     mv t3, s0
     ZERO_WORDS t3, K12_SUBPROD_WORDS
 
-    la t3, K6_TA
-    ZERO_WORDS t3, K6_HALF_WORDS
+    # la t3, K6_TA
+    # ZERO_WORDS t3, K6_HALF_WORDS
 
-    la t3, K6_TB
-    ZERO_WORDS t3, K6_HALF_WORDS
+    # la t3, K6_TB
+    # ZERO_WORDS t3, K6_HALF_WORDS
 
-    la t3, K6_Z0
-    ZERO_WORDS t3, K6_SUBPROD_WORDS
+    # la t3, K6_Z0
+    # ZERO_WORDS t3, K6_SUBPROD_WORDS
 
-    la t3, K6_Z2
-    ZERO_WORDS t3, K6_SUBPROD_WORDS
+    # la t3, K6_Z2
+    # ZERO_WORDS t3, K6_SUBPROD_WORDS
 
-    la t3, K6_ZM
-    ZERO_WORDS t3, K6_SUBPROD_WORDS
+    # la t3, K6_ZM
+    # ZERO_WORDS t3, K6_SUBPROD_WORDS
 
 # DECOMPOSITION
     # TA = A0 ^ A1
@@ -651,7 +651,7 @@ rvv_kara6_mul:
     la a0, K6_Z0
     mv a1, s1
     mv a2, s2
-    li a3, K6_HALF_WORDS
+    # li a3, K6_HALF_WORDS
     call gf2x_mul3_leaf
 
     # Z2 = A1 * B1
@@ -660,14 +660,14 @@ rvv_kara6_mul:
     addi a1, a1, K6_HALF_WORDS * 8
     mv a2, s2
     addi a2, a2, K6_HALF_WORDS * 8
-    li a3, K6_HALF_WORDS
+    # li a3, K6_HALF_WORDS
     call gf2x_mul3_leaf
 
     # ZM = TA * TB
     la a0, K6_ZM
     la a1, K6_TA
     la a2, K6_TB
-    li a3, K6_HALF_WORDS
+    # li a3, K6_HALF_WORDS
     call gf2x_mul3_leaf
 
     # middle = ZM ^ Z0 ^ Z2
@@ -698,20 +698,20 @@ rvv_kara6_mul:
     XOR_INTO_WORDS t3, t4, K6_SUBPROD_WORDS
 
 # CLEAN TEMPORARIES
-    la t3, K6_TA
-    ZERO_WORDS t3, K6_HALF_WORDS
+    # la t3, K6_TA
+    # ZERO_WORDS t3, K6_HALF_WORDS
 
-    la t3, K6_TB
-    ZERO_WORDS t3, K6_HALF_WORDS
+    # la t3, K6_TB
+    # ZERO_WORDS t3, K6_HALF_WORDS
 
-    la t3, K6_Z0
-    ZERO_WORDS t3, K6_SUBPROD_WORDS
+    # la t3, K6_Z0
+    # ZERO_WORDS t3, K6_SUBPROD_WORDS
 
-    la t3, K6_Z2
-    ZERO_WORDS t3, K6_SUBPROD_WORDS
+    # la t3, K6_Z2
+    # ZERO_WORDS t3, K6_SUBPROD_WORDS
 
-    la t3, K6_ZM
-    ZERO_WORDS t3, K6_SUBPROD_WORDS
+    # la t3, K6_ZM
+    # ZERO_WORDS t3, K6_SUBPROD_WORDS
 
     ld s2, 0(sp)
     ld s1, 8(sp)
