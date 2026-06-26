@@ -5,6 +5,7 @@
 #define VSETVLI_E16_M1(rd, rs1)  .insn i 0x57, 0x7, rd, rs1, 4
 #define VSETVLI_E32_M1(rd, rs1)  .insn i 0x57, 0x7, rd, rs1, 8
 #define VSETVLI_E64_M1(rd, rs1)  .insn i 0x57, 0x7, rd, rs1, 12
+#define VSETVLI_E64_M8(rd, rs1)  .insn i 0x57, 0x7, rd, rs1, 15
 
 #define TOOM_WORDS          94
 #define EVAL_WORDS          96
@@ -37,7 +38,7 @@
     li t0, \nwords
 .L_zero_loop\@:
     beqz t0, .L_zero_done\@
-    VSETVLI_E64_M1(t1, t0)
+    VSETVLI_E64_M8(t1, t0)
     vmv.v.i v0, 0
     vse64.v v0, (\ptr_reg)
     slli t2, t1, 3
@@ -51,7 +52,7 @@
     li t0, \nwords
 .L_copy_loop\@:
     beqz t0, .L_copy_done\@
-    VSETVLI_E64_M1(t1, t0)
+    VSETVLI_E64_M8(t1, t0)
     vle64.v v0, (\src_reg)
     vse64.v v0, (\dst_reg)
     slli t2, t1, 3
@@ -66,11 +67,11 @@
     li t0, \nwords
 .L_xor2_loop\@:
     beqz t0, .L_xor2_done\@
-    VSETVLI_E64_M1(t1, t0)
+    VSETVLI_E64_M8(t1, t0)
     vle64.v v0, (\src1_reg)
-    vle64.v v1, (\src2_reg)
-    vxor.vv v2, v0, v1
-    vse64.v v2, (\dst_reg)
+    vle64.v v8, (\src2_reg)
+    vxor.vv v16, v0, v8
+    vse64.v v16, (\dst_reg)
     slli t2, t1, 3
     add \src1_reg, \src1_reg, t2
     add \src2_reg, \src2_reg, t2
@@ -84,13 +85,13 @@
     li t0, \nwords
 .L_xor3_loop\@:
     beqz t0, .L_xor3_done\@
-    VSETVLI_E64_M1(t1, t0)
+    VSETVLI_E64_M8(t1, t0)
     vle64.v v0, (\src1_reg)
-    vle64.v v1, (\src2_reg)
-    vle64.v v2, (\src3_reg)
-    vxor.vv v3, v0, v1
-    vxor.vv v3, v3, v2
-    vse64.v v3, (\dst_reg)
+    vle64.v v8, (\src2_reg)
+    vle64.v v16, (\src3_reg)
+    vxor.vv v0, v0, v8
+    vxor.vv v0, v0, v16
+    vse64.v v0, (\dst_reg)
     slli t2, t1, 3
     add \src1_reg, \src1_reg, t2
     add \src2_reg, \src2_reg, t2
@@ -105,10 +106,10 @@
     li t0, \nwords
 .L_xor_into_loop\@:
     beqz t0, .L_xor_into_done\@
-    VSETVLI_E64_M1(t1, t0)
+    VSETVLI_E64_M8(t1, t0)
     vle64.v v0, (\dst_reg)
-    vle64.v v1, (\src_reg)
-    vxor.vv v0, v0, v1
+    vle64.v v8, (\src_reg)
+    vxor.vv v0, v0, v8
     vse64.v v0, (\dst_reg)
     slli t2, t1, 3
     add \dst_reg, \dst_reg, t2
