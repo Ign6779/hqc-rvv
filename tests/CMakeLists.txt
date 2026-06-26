@@ -31,7 +31,7 @@ target_compile_options(munit PRIVATE
     $<$<C_COMPILER_ID:GNU>:-Wno-gnu>
 )
 
-set(VARIANTS "hqc-1;hqc-3;hqc-5" CACHE INTERNAL "List of HQC variants")
+# VARIANTS is defined in the top-level CMakeLists.txt and inherited here
 
 # Where KAT diffs and verbose outputs go
 set(TEST_OUTPUT_DIR "${CMAKE_BINARY_DIR}/test_outputs")

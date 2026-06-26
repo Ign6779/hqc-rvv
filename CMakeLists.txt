@@ -110,7 +110,7 @@ endif()
 # -----------------------------------------------------------------------------
 # BUILD SUBDIRECTORIES
 # -----------------------------------------------------------------------------
-set(VARIANTS hqc-1 hqc-3 hqc-5)
+set(VARIANTS hqc-1 hqc-3 hqc-5 CACHE STRING "List of HQC variants to build")
 
 add_subdirectory(lib)
 add_subdirectory(src)
